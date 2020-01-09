@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
+using Newtonsoft.Json;
 
 namespace LightConversion.Software.Settings {
+    public class GlobalStuff {
+        /// <summary>
+        /// Made this for <see cref="SettingsManager"/> to compile for now.
+        /// </summary>
+        public static string SettingsFilePath = "bybis.txt";
+    }
+
     /// <summary>
     /// 
     /// </summary>
     public class SettingsManager : IDisposable {
-        public Logger Log { get; } = LogManager.GetLogger("PhoebeLog.SettingsManager");
+        //public Logger Log { get; } = LogManager.GetLogger("PhoebeLog.SettingsManager");
 
         private readonly object _dataStorageLock = new object();
         private Dictionary<string, Dictionary<string, object>> _dataStorage = new Dictionary<string, Dictionary<string, object>>();
@@ -51,10 +59,12 @@ namespace LightConversion.Software.Settings {
                         _dataStorage = new Dictionary<string, Dictionary<string, object>>();
                     }
 
-                    if (_isInitialized) MessageBus.Default.Send(this, MessageBusTokens.SettingsChanged);
+                    if (_isInitialized) {
+                        //MessageBus.Default.Send(this, MessageBusTokens.SettingsChanged);
+                    }
                 }
             } catch (Exception ex) {
-                Log.Error(ex);
+                Debug.Print(ex.ToString());
             }
         }
 
