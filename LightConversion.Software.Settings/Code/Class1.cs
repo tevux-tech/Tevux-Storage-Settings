@@ -1,6 +1,5 @@
 ﻿using System;
 
 namespace LightConversion.Software.Settings {
-    public class Class1 {
-    }
+    public class Class1 {}
 }
