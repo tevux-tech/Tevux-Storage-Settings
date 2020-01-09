@@ -50,7 +50,7 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             // Simulating state when system crashed after first write to rf1.
-            File.WriteAllText("temp/someFile.rf1", "some text");
+            File.WriteAllText("temp/someFile.txt.rf1", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
@@ -64,7 +64,7 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             // Simulating state when system crashed after successfully writing to rf1 and moving it to rf2. 
-            File.WriteAllText("temp/someFile.rf2", "some text");
+            File.WriteAllText("temp/someFile.txt.rf2", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
@@ -79,7 +79,7 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             // Simulating state when system crashed after first write to rf1.
-            File.WriteAllText("temp/someFile.rf1", "some text");
+            File.WriteAllText("temp/someFile.txt.rf1", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
@@ -93,12 +93,12 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             // Simulating state when system crashed after successfully writing to rf1 and moving it to rf2. 
-            File.WriteAllText("temp/someFile.rf2", "some text");
+            File.WriteAllText("temp/someFile.txt.rf2", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
-            var isRf2StillPresent = File.Exists("temp/someFile.rf2");
+            var isRf2StillPresent = File.Exists("temp/someFile.txt.rf2");
             Assert.IsFalse(isRf2StillPresent);
         }
 

@@ -38,17 +38,16 @@ namespace LightConversion.Software.Settings {
     }
 
     public class ReliableFile {
-        private readonly string _rf1Filename = "";
-        private readonly string _rf2Filename = "";
-        private object _lock = new object();
-        public string Name { get; }
+        private readonly string _rf1FilePath;
+        private readonly string _rf2FilePath;
+        private readonly object _lock = new object();
+        public string Path { get; }
 
-        public ReliableFile(string filenameName) {
-            var fileNameNoExtension = Path.GetFileNameWithoutExtension(filenameName);
-            // Building all the filenames we'll be using in this class.
-            Name = filenameName;
-            _rf1Filename = fileNameNoExtension + ".rf1";
-            _rf2Filename = fileNameNoExtension + ".rf2";
+        public ReliableFile(string filePath) {
+            // Building all the file paths we'll be using in this class.
+            Path = filePath;
+            _rf1FilePath = filePath + ".rf1";
+            _rf2FilePath = filePath + ".rf2";
         }
 
         public bool Initialize() {
@@ -58,9 +57,9 @@ namespace LightConversion.Software.Settings {
             var rf2FileExists = false;
             // Checking what is on the disk.
             lock (_lock) {
-                mainFileExists = File.Exists(Name);
-                rf1FileExists = File.Exists(_rf1Filename);
-                rf2FileExists = File.Exists(_rf2Filename);
+                mainFileExists = File.Exists(Path);
+                rf1FileExists = File.Exists(_rf1FilePath);
+                rf2FileExists = File.Exists(_rf2FilePath);
             }
 
             // Assessing situation, depending on files present.
@@ -82,9 +81,9 @@ namespace LightConversion.Software.Settings {
             if (state == "recoverable") {
                 // Something is not right, but rf2 is present, so restoring from it.
                 lock (_lock) {
-                    File.Delete(Name);
-                    File.Delete(_rf1Filename);
-                    File.Move(_rf2Filename, Name);
+                    File.Delete(Path);
+                    File.Delete(_rf1FilePath);
+                    File.Move(_rf2FilePath, Path);
                 }
 
                 returnValue = true;
@@ -92,13 +91,13 @@ namespace LightConversion.Software.Settings {
 
             if (state == "littered") {
                 // Last write is probably lost, but main file is still there. Just cleaning up.
-                File.Delete(_rf1Filename);
+                File.Delete(_rf1FilePath);
                 returnValue = true;
             }
 
             if (state == "unrecoverable") {
                 // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
-                File.Delete(_rf1Filename);
+                File.Delete(_rf1FilePath);
                 returnValue = true;
             }
 
@@ -106,11 +105,16 @@ namespace LightConversion.Software.Settings {
         }
 
         public bool TryReadAllText(out string fileContent) {
-            var returnValue = false;
+            bool returnValue;
+
             fileContent = "";
             lock (_lock) {
-                fileContent = File.ReadAllText(Name);
-                returnValue = true;
+                if (File.Exists(Path)) {
+                    fileContent = File.ReadAllText(Path);
+                    returnValue = true;
+                } else {
+                    returnValue = false;
+                }
             }
 
             return returnValue;
@@ -119,10 +123,10 @@ namespace LightConversion.Software.Settings {
         public bool TryWriteAllText(string textToWrite) {
             var returnValue = false;
             lock (_lock) {
-                File.WriteAllText(_rf1Filename, textToWrite);
-                File.Move(_rf1Filename, _rf2Filename);
-                File.Delete(Name);
-                File.Move(_rf2Filename, Name);
+                File.WriteAllText(_rf1FilePath, textToWrite);
+                File.Move(_rf1FilePath, _rf2FilePath);
+                File.Delete(Path);
+                File.Move(_rf2FilePath, Path);
                 returnValue = true;
             }
 
