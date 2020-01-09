@@ -60,6 +60,45 @@ namespace LightConversion.Software.Settings.Tests {
         }
 
         [TestMethod]
+        public void TestFallbackRecoveryRf1() {
+            CreateCleanTempFolder();
+
+            // Simulating state when system crashed after second write to rf1. So rf1 contents must be lost, but original file must still be readable.
+            File.WriteAllText("temp/someFile.txt", "some text");
+            File.WriteAllText("temp/someFile.txt.rf1", "new text");
+
+            var reliableFile = new ReliableFile("temp/someFile.txt");
+            reliableFile.Initialize();
+
+            var isOk = reliableFile.TryReadAllText(out var fileContent);
+            Assert.IsTrue(isOk, "Original file must be read");
+            Assert.AreEqual("some text", fileContent, "Original file must be read");
+
+            var actualFileContents = File.ReadAllText("temp/someFile.txt");
+            Assert.AreEqual("some text", actualFileContents, "Original file must be unchanged");
+        }
+
+        [TestMethod]
+        public void TestFallbackRecoveryRf2() {
+            CreateCleanTempFolder();
+
+            // Simulating state when system crashed after second write to rf2.
+            File.WriteAllText("temp/someFile.txt", "some text");
+            File.WriteAllText("temp/someFile.txt.rf2", "new text");
+
+            var reliableFile = new ReliableFile("temp/someFile.txt");
+            reliableFile.Initialize();
+
+            var isOk = reliableFile.TryReadAllText(out var fileContent);
+            Assert.IsTrue(isOk, "Backup from rf2 must be made");
+            Assert.AreEqual("new text", fileContent, "Backup from rf2 must be made");
+
+            var actualFileContents = File.ReadAllText("temp/someFile.txt");
+            Assert.AreEqual("new text", actualFileContents, "Backup from rf2 must be made");
+        }
+
+
+        [TestMethod]
         public void TestRecoverableFileFromRf2() {
             CreateCleanTempFolder();
 
