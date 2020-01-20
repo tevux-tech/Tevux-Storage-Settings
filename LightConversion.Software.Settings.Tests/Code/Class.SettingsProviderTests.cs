@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.IO;
+﻿using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LightConversion.Software.Settings.Tests {
@@ -30,6 +29,61 @@ namespace LightConversion.Software.Settings.Tests {
             settings.TrySet("SomeStringKey", "Some string");
             settings.TryGet("SomeStringKey", out string someStringValue);
             Assert.AreEqual("Some string", someStringValue);
+        }
+
+        [TestMethod]
+        public void TestBasicFileLoading() {
+            CreateCleanTempFolder();
+
+            File.WriteAllText("temp/someSettings.json", @"{
+                ""SomeIntegerKey"": 123,
+                ""SomeDoubleKey"": 123.456,
+                ""SomeBoolKey"": true,
+                ""SomeStringKey"": ""Some string""
+            }");
+
+            var settings = new SettingsProvider();
+            settings.Initialize("temp/someSettings.json");
+
+            var isOk = settings.TryGet("SomeIntegerKey", out int someIntegerValue);
+            Assert.IsTrue(isOk);
+            Assert.AreEqual(123, someIntegerValue);
+
+            isOk = settings.TryGet("SomeDoubleKey", out double someDoubleValue);
+            Assert.IsTrue(isOk);
+            Assert.AreEqual(123.456, someDoubleValue);
+
+            isOk = settings.TryGet("SomeBoolKey", out bool someBoolValue);
+            Assert.IsTrue(isOk);
+            Assert.AreEqual(true, someBoolValue);
+
+            isOk = settings.TryGet("SomeStringKey", out string someStringValue);
+            Assert.IsTrue(isOk);
+            Assert.AreEqual("Some string", someStringValue);
+        }
+
+        [TestMethod]
+        public void TestBasicFileSaving() {
+            CreateCleanTempFolder();
+
+            var settings = new SettingsProvider();
+            settings.Initialize("temp/someSettings.json");
+
+            var isOk = settings.TrySet("SomeDoubleKey", 3.1415);
+            Assert.IsTrue(isOk);
+
+            isOk = settings.TrySet("SomeStringKey", "Hello world");
+            Assert.IsTrue(isOk);
+
+            var isFilePresent = File.Exists("temp/someSettings.json");
+            Assert.IsTrue(isFilePresent);
+
+            var actualFileContents = File.ReadAllText("temp/someSettings.json");
+            var expectedFileContents = @"{
+  ""SomeDoubleKey"": 3.1415,
+  ""SomeStringKey"": ""Hello world""
+}";
+            Assert.AreEqual(expectedFileContents, actualFileContents);
         }
 
         private void CreateCleanTempFolder() {

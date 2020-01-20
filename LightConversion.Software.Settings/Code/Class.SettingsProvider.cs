@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace LightConversion.Software.Settings {
     public class SettingsProvider : IDisposable {
         private Dictionary<string, object> _dataCache;
-        private readonly object _dataCacheLock = new object();
+        private readonly object _dataLock = new object();
         private ReliableFile _dataFile;
         public bool IsInitialized { get; private set; }
 
@@ -31,35 +30,32 @@ namespace LightConversion.Software.Settings {
         }
 
         public bool TrySet(string key, int value) {
-            lock (_dataCacheLock) {
-                _dataCache[key] = value;
-            }
-
-            return true;
+            return TrySetInternal<int>(key, value);
         }
 
         public bool TrySet(string key, double value) {
-            lock (_dataCacheLock) {
-                _dataCache[key] = value;
-            }
-
-            return true;
+            return TrySetInternal<double>(key, value);
         }
 
         public bool TrySet(string key, string value) {
-            lock (_dataCacheLock) {
-                _dataCache[key] = value;
-            }
-
-            return true;
+            return TrySetInternal<string>(key, value);
         }
 
         public bool TrySet(string key, bool value) {
-            lock (_dataCacheLock) {
+            return TrySetInternal<bool>(key, value);
+        }
+
+        private bool TrySetInternal<T>(string key, T value) {
+            bool isOk;
+
+            lock (_dataLock) {
                 _dataCache[key] = value;
+                var jsonBytes = Utf8Json.JsonSerializer.Serialize(_dataCache);
+                var prettyJson = Utf8Json.JsonSerializer.PrettyPrint(jsonBytes);
+                isOk = _dataFile.TryWriteAllText(prettyJson);
             }
 
-            return true;
+            return isOk;
         }
 
         public bool TryGet(string key, out int value, bool setToDefaultIfDoesNotExist = false, int defaultValue = 0) {
@@ -68,7 +64,7 @@ namespace LightConversion.Software.Settings {
 
             object valueOfUnknownType;
 
-            lock (_dataCacheLock) {
+            lock (_dataLock) {
                 isOk = _dataCache.TryGetValue(key, out valueOfUnknownType);
             }
 
@@ -85,7 +81,7 @@ namespace LightConversion.Software.Settings {
 
             object valueOfUnknownType;
 
-            lock (_dataCacheLock) {
+            lock (_dataLock) {
                 isOk = _dataCache.TryGetValue(key, out valueOfUnknownType);
             }
 
@@ -102,7 +98,7 @@ namespace LightConversion.Software.Settings {
 
             object valueOfUnknownType;
 
-            lock (_dataCacheLock) {
+            lock (_dataLock) {
                 isOk = _dataCache.TryGetValue(key, out valueOfUnknownType);
             }
 
@@ -119,7 +115,7 @@ namespace LightConversion.Software.Settings {
 
             object valueOfUnknownType;
 
-            lock (_dataCacheLock) {
+            lock (_dataLock) {
                 isOk = _dataCache.TryGetValue(key, out valueOfUnknownType);
             }
 
