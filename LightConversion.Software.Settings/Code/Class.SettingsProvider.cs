@@ -62,14 +62,12 @@ namespace LightConversion.Software.Settings {
             bool isOk;
             value = 0;
 
-            object valueOfUnknownType;
+            isOk = TryGetInternal(key, out var valueOfUnknownType);
+            if (isOk) isOk = TryConvertToInt(valueOfUnknownType, out value);
 
-            lock (_dataLock) {
-                isOk = _dataCache.TryGetValue(key, out valueOfUnknownType);
-            }
-
-            if (isOk) {
-                isOk = TryConvertToInt(valueOfUnknownType, out value);
+            if ((isOk == false) && setToDefaultIfDoesNotExist) {
+                isOk = TrySetInternal(key, defaultValue);
+                if (isOk) value = defaultValue;
             }
 
             return isOk;
@@ -79,31 +77,12 @@ namespace LightConversion.Software.Settings {
             bool isOk;
             value = 0;
 
-            object valueOfUnknownType;
+            isOk = TryGetInternal(key, out var valueOfUnknownType);
+            if (isOk) isOk = TryConvertToDouble(valueOfUnknownType, out value);
 
-            lock (_dataLock) {
-                isOk = _dataCache.TryGetValue(key, out valueOfUnknownType);
-            }
-
-            if (isOk) {
-                isOk = TryConvertToDouble(valueOfUnknownType, out value);
-            }
-
-            return isOk;
-        }
-
-        public bool TryGet(string key, out string value, bool setToDefaultIfDoesNotExist = false, string defaultValue = null) {
-            bool isOk;
-            value = "";
-
-            object valueOfUnknownType;
-
-            lock (_dataLock) {
-                isOk = _dataCache.TryGetValue(key, out valueOfUnknownType);
-            }
-
-            if (isOk) {
-                isOk = TryConvertToString(valueOfUnknownType, out value);
+            if ((isOk == false) && setToDefaultIfDoesNotExist) {
+                isOk = TrySetInternal(key, defaultValue);
+                if (isOk) value = defaultValue;
             }
 
             return isOk;
@@ -113,18 +92,40 @@ namespace LightConversion.Software.Settings {
             bool isOk;
             value = false;
 
-            object valueOfUnknownType;
+            isOk = TryGetInternal(key, out var valueOfUnknownType);
+            if (isOk) isOk = TryConvertToBool(valueOfUnknownType, out value);
 
-            lock (_dataLock) {
-                isOk = _dataCache.TryGetValue(key, out valueOfUnknownType);
-            }
-
-            if (isOk) {
-                isOk = TryConvertToBool(valueOfUnknownType, out value);
+            if ((isOk == false) && setToDefaultIfDoesNotExist) {
+                isOk = TrySetInternal(key, defaultValue);
+                if (isOk) value = defaultValue;
             }
 
             return isOk;
         }
+
+
+        public bool TryGet(string key, out string value, bool setToDefaultIfDoesNotExist = false, string defaultValue = null) {
+            bool isOk;
+            value = "";
+
+            isOk = TryGetInternal(key, out var valueOfUnknownType);
+            if (isOk) isOk = TryConvertToString(valueOfUnknownType, out value);
+
+            if ((isOk == false) && setToDefaultIfDoesNotExist) {
+                isOk = TrySetInternal(key, defaultValue);
+                if (isOk) value = defaultValue;
+            }
+
+
+            return isOk;
+        }
+
+        private bool TryGetInternal(string key, out object value) {
+            lock (_dataLock) {
+                return _dataCache.TryGetValue(key, out value);
+            }
+        }
+
 
         private bool TryConvertToInt(object valueToConvert, out int convertedValue) {
             var isOk = true;
