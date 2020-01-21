@@ -1,0 +1,63 @@
+﻿using System;
+
+namespace LightConversion.Software.Settings {
+    public partial class SettingsProvider {
+        private bool TryConvert(object valueToConvert, out int convertedValue) {
+            var isOk = true;
+
+            if (valueToConvert is int valueAsInt) {
+                convertedValue = valueAsInt;
+            } else if (valueToConvert is long valueAsLong) {
+                convertedValue = (int)valueAsLong;
+            } else if (valueToConvert is double valueAsDouble) {
+                convertedValue = Convert.ToInt32(valueAsDouble);
+            } else {
+                convertedValue = 0;
+                isOk = false;
+            }
+
+            return isOk;
+        }
+
+        private bool TryConvert(object valueToConvert, out double convertedValue) {
+            var isOk = true;
+
+            if (valueToConvert is double valueAsDouble) {
+                convertedValue = valueAsDouble;
+            } else if (valueToConvert is int valueAsInt) {
+                convertedValue = valueAsInt;
+            } else if (valueToConvert is long valueAsLong) {
+                convertedValue = valueAsLong;
+            } else {
+                convertedValue = 0;
+                isOk = false;
+            }
+
+            return isOk;
+        }
+
+        private bool TryConvert(object valueToConvert, out bool convertedValue) {
+            bool isOk;
+
+            if (valueToConvert is bool valueAsBool) {
+                isOk = true;
+                convertedValue = valueAsBool;
+            } else {
+                isOk = false;
+                convertedValue = false;
+            }
+
+            return isOk;
+        }
+
+        private bool TryConvert(object valueToConvert, out string convertedValue) {
+            if (valueToConvert is string valueAsString) {
+                convertedValue = valueAsString;
+                return true;
+            } else {
+                convertedValue = "";
+                return false;
+            }
+        }
+    }
+}
