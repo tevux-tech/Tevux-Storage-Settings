@@ -104,5 +104,18 @@ namespace LightConversion.Software.Settings {
 
             return returnValue;
         }
+
+        public bool TryWriteAllBytes(byte[] bytesToWrite) {
+            var returnValue = false;
+            lock (_lock) {
+                File.WriteAllBytes(_rf1FilePath, bytesToWrite);
+                File.Move(_rf1FilePath, _rf2FilePath);
+                File.Delete(Path);
+                File.Move(_rf2FilePath, Path);
+                returnValue = true;
+            }
+
+            return returnValue;
+        }
     }
 }

@@ -6,8 +6,8 @@
             lock (_dataLock) {
                 _dataCache[key] = value;
                 var jsonBytes = Utf8Json.JsonSerializer.Serialize(_dataCache);
-                var prettyJson = Utf8Json.JsonSerializer.PrettyPrint(jsonBytes);
-                isOk = _dataFile.TryWriteAllText(prettyJson);
+                var prettyJsonBytes = Utf8Json.JsonSerializer.PrettyPrintByteArray(jsonBytes);
+                isOk = _dataFile.TryWriteAllBytes(prettyJsonBytes);
             }
 
             return isOk;
