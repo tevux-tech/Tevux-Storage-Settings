@@ -165,6 +165,41 @@ namespace LightConversion.Software.Settings.Tests {
             }
         }
 
+        [TestMethod]
+        public void TestInvalidJsonBackup() {
+            CreateCleanTempFolder();
+
+            File.WriteAllText("temp/someSettings.json", "Invalid json text");
+
+            var settings = new SettingsProvider();
+            settings.Initialize("temp/someSettings.json");
+
+            var isBackupCreated = File.Exists(settings.FilePath + ".backup");
+            Assert.IsTrue(isBackupCreated);
+
+            var isBackupCorrect = File.ReadAllText(settings.FilePath + ".backup") == "Invalid json text";
+            Assert.IsTrue(isBackupCorrect);
+        }
+
+        [TestMethod]
+        public void TestTwoBackups() {
+            CreateCleanTempFolder();
+
+            File.WriteAllText("temp/someSettings.json", "Invalid json text");
+
+            var settings = new SettingsProvider();
+            settings.Initialize("temp/someSettings.json");
+
+            File.WriteAllText("temp/someSettings.json", "Invalid json text again...");
+
+            try {
+                settings = new SettingsProvider();
+                settings.Initialize("temp/someSettings.json");
+            } catch (Exception ex) {
+                Assert.Fail("No exception should be thrown", ex);
+            }
+        }
+
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
                 Directory.Delete("temp", true);
