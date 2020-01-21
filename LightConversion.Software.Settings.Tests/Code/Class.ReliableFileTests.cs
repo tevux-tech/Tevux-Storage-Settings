@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LightConversion.Software.Settings.Tests {
@@ -141,6 +142,26 @@ namespace LightConversion.Software.Settings.Tests {
             Assert.IsFalse(isRf2StillPresent);
         }
 
+        [TestMethod]
+        public void TestAlreadyOpenFile() {
+            CreateCleanTempFolder();
+
+            // Simulating opened file by other program.
+            using (var openFileStream = File.Open("temp/someFile.txt", FileMode.OpenOrCreate)) {
+                var reliableFile = new ReliableFile("temp/someFile.txt");
+                reliableFile.Initialize();
+
+                try {
+                    var isOk = reliableFile.TryReadAllText(out var fileContent);
+                    Assert.IsFalse(isOk, "Must fail because file isn't accessible.");
+
+                    isOk = reliableFile.TryWriteAllText("Some text");
+                    Assert.IsFalse(isOk, "Must fail because file isn't accessible.");
+                } catch (Exception ex) {
+                    Assert.Fail("No exception should be thrown");
+                }
+            }
+        }
 
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
