@@ -7,9 +7,9 @@ namespace LightConversion.Software.Settings {
         public void Initialize(string storageFilePath) {
             _dataFile = new ReliableFile(storageFilePath);
 
-            if (_dataFile.TryReadAllText(out var fileContents)) {
+            if (_dataFile.TryReadAllBytes(out var fileBytes)) {
                 try {
-                    _dataCache = JsonSerializer.Deserialize<Dictionary<string, object>>(fileContents);
+                    _dataCache = JsonSerializer.Deserialize<Dictionary<string, object>>(fileBytes);
                 } catch (JsonParsingException) {
                     // File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file.
                     var backupFilePath = storageFilePath + ".backup";

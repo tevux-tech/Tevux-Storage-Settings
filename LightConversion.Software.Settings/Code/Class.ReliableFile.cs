@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace LightConversion.Software.Settings {
     public class ReliableFile {
@@ -77,12 +78,21 @@ namespace LightConversion.Software.Settings {
         }
 
         public bool TryReadAllText(out string fileContent) {
+            var isOk = TryReadAllBytes(out var fileBytes);
+            
+            if (isOk) fileContent = Encoding.UTF8.GetString(fileBytes);
+            else fileContent = "";
+
+            return isOk;
+        }
+
+        public bool TryReadAllBytes(out byte[] fileContent) {
             bool returnValue;
 
-            fileContent = "";
+            fileContent = new byte[0];
             lock (_lock) {
                 if (File.Exists(Path)) {
-                    fileContent = File.ReadAllText(Path);
+                    fileContent = File.ReadAllBytes(Path);
                     returnValue = true;
                 } else {
                     returnValue = false;
@@ -93,16 +103,7 @@ namespace LightConversion.Software.Settings {
         }
 
         public bool TryWriteAllText(string textToWrite) {
-            var returnValue = false;
-            lock (_lock) {
-                File.WriteAllText(_rf1FilePath, textToWrite);
-                File.Move(_rf1FilePath, _rf2FilePath);
-                File.Delete(Path);
-                File.Move(_rf2FilePath, Path);
-                returnValue = true;
-            }
-
-            return returnValue;
+            return TryWriteAllBytes(Encoding.UTF8.GetBytes(textToWrite));
         }
 
         public bool TryWriteAllBytes(byte[] bytesToWrite) {
