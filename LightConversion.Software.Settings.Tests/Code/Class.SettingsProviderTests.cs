@@ -13,7 +13,7 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             var settings = new SettingsProvider();
-            settings.Initialize("temp/someSettings.json");
+            settings.Initialize(new ReliableFile("temp/someSettings.json"));
 
             settings.TrySet("SomeIntegerKey", 123);
             settings.TryGet("SomeIntegerKey", out int someIntegerValue);
@@ -44,7 +44,7 @@ namespace LightConversion.Software.Settings.Tests {
             }");
 
             var settings = new SettingsProvider();
-            settings.Initialize("temp/someSettings.json");
+            settings.Initialize(new ReliableFile("temp/someSettings.json"));
 
             var isOk = settings.TryGet("SomeIntegerKey", out int someIntegerValue);
             Assert.IsTrue(isOk);
@@ -68,7 +68,7 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             var settings = new SettingsProvider();
-            settings.Initialize("temp/someSettings.json");
+            settings.Initialize(new ReliableFile("temp/someSettings.json"));
 
             var isOk = settings.TrySet("SomeDoubleKey", 3.1415);
             Assert.IsTrue(isOk);
@@ -97,7 +97,7 @@ namespace LightConversion.Software.Settings.Tests {
             }");
 
             var settings = new SettingsProvider();
-            settings.Initialize("temp/someSettings.json");
+            settings.Initialize(new ReliableFile("temp/someSettings.json"));
 
             var isOk = settings.TryGet("SomeIntegerKey", out int someInteger);
             Assert.IsTrue(isOk);
@@ -109,48 +109,6 @@ namespace LightConversion.Software.Settings.Tests {
         }
 
         [TestMethod]
-        public void TestDefaultValues() {
-            CreateCleanTempFolder();
-
-            var settings = new SettingsProvider();
-            settings.Initialize("temp/someSettings.json");
-
-            var isOk = settings.TryGet("NonExistingIntKey", out int intValue, true, 123);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(123, intValue);
-
-            isOk = settings.TryGet("NonExistingDoubleKey", out double doubleValue, true, 3.1415);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(3.1415, doubleValue);
-
-            isOk = settings.TryGet("NonExistingBoolKey", out bool boolValue, true, true);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(true, boolValue);
-
-            isOk = settings.TryGet("NonExistingStringKey", out string stringValue, true, "Default value");
-            Assert.IsTrue(isOk);
-            Assert.AreEqual("Default value", stringValue);
-
-            // Values should now be set to default from now on.
-
-            isOk = settings.TryGet("NonExistingIntKey", out intValue);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(123, intValue);
-
-            isOk = settings.TryGet("NonExistingDoubleKey", out doubleValue);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(3.1415, doubleValue);
-
-            isOk = settings.TryGet("NonExistingBoolKey", out boolValue);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(true, boolValue);
-
-            isOk = settings.TryGet("NonExistingStringKey", out stringValue);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual("Default value", stringValue);
-        }
-
-        [TestMethod]
         public void TestInitializationWithInvalidJson() {
             CreateCleanTempFolder();
 
@@ -159,7 +117,7 @@ namespace LightConversion.Software.Settings.Tests {
             var settings = new SettingsProvider();
 
             try {
-                settings.Initialize("temp/someSettings.json");
+                settings.Initialize(new ReliableFile("temp/someSettings.json"));
             } catch (Exception ex) {
                 Assert.Fail("Initialization shouldn't throw any exceptions", ex);
             }
@@ -172,12 +130,12 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someSettings.json", "Invalid json text");
 
             var settings = new SettingsProvider();
-            settings.Initialize("temp/someSettings.json");
+            settings.Initialize(new ReliableFile("temp/someSettings.json"));
 
-            var isBackupCreated = File.Exists(settings.FilePath + ".backup");
+            var isBackupCreated = File.Exists(settings.DataFile.Path + ".backup");
             Assert.IsTrue(isBackupCreated);
 
-            var isBackupCorrect = File.ReadAllText(settings.FilePath + ".backup") == "Invalid json text";
+            var isBackupCorrect = File.ReadAllText(settings.DataFile.Path + ".backup") == "Invalid json text";
             Assert.IsTrue(isBackupCorrect);
         }
 
@@ -188,13 +146,13 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someSettings.json", "Invalid json text");
 
             var settings = new SettingsProvider();
-            settings.Initialize("temp/someSettings.json");
+            settings.Initialize(new ReliableFile("temp/someSettings.json"));
 
             File.WriteAllText("temp/someSettings.json", "Invalid json text again...");
 
             try {
                 settings = new SettingsProvider();
-                settings.Initialize("temp/someSettings.json");
+                settings.Initialize(new ReliableFile("temp/someSettings.json"));
             } catch (Exception ex) {
                 Assert.Fail("No exception should be thrown", ex);
             }

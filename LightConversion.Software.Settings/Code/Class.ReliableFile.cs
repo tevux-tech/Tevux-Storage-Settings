@@ -77,6 +77,10 @@ namespace LightConversion.Software.Settings {
             return returnValue;
         }
 
+        public bool Exists() {
+            return File.Exists(Path);
+        }
+
         public bool TryReadAllText(out string fileContent) {
             var isOk = TryReadAllBytes(out var fileBytes);
             
