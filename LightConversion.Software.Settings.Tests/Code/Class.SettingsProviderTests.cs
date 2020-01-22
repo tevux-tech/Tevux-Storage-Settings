@@ -109,48 +109,6 @@ namespace LightConversion.Software.Settings.Tests {
         }
 
         [TestMethod]
-        public void TestDefaultValues() {
-            CreateCleanTempFolder();
-
-            var settings = new SettingsProvider();
-            settings.Initialize("temp/someSettings.json");
-
-            var isOk = settings.TryGet("NonExistingIntKey", out int intValue, true, 123);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(123, intValue);
-
-            isOk = settings.TryGet("NonExistingDoubleKey", out double doubleValue, true, 3.1415);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(3.1415, doubleValue);
-
-            isOk = settings.TryGet("NonExistingBoolKey", out bool boolValue, true, true);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(true, boolValue);
-
-            isOk = settings.TryGet("NonExistingStringKey", out string stringValue, true, "Default value");
-            Assert.IsTrue(isOk);
-            Assert.AreEqual("Default value", stringValue);
-
-            // Values should now be set to default from now on.
-
-            isOk = settings.TryGet("NonExistingIntKey", out intValue);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(123, intValue);
-
-            isOk = settings.TryGet("NonExistingDoubleKey", out doubleValue);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(3.1415, doubleValue);
-
-            isOk = settings.TryGet("NonExistingBoolKey", out boolValue);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual(true, boolValue);
-
-            isOk = settings.TryGet("NonExistingStringKey", out stringValue);
-            Assert.IsTrue(isOk);
-            Assert.AreEqual("Default value", stringValue);
-        }
-
-        [TestMethod]
         public void TestInitializationWithInvalidJson() {
             CreateCleanTempFolder();
 
