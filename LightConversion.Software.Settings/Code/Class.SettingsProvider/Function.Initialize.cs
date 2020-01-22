@@ -4,23 +4,23 @@ using Utf8Json;
 
 namespace LightConversion.Software.Settings {
     public partial class SettingsProvider {
-        public void Initialize(string storageFilePath) {
-            _dataFile = new ReliableFile(storageFilePath);
+        public void Initialize(ReliableFile dataFile) {
+            DataFile = dataFile;
 
-            if (_dataFile.TryReadAllBytes(out var fileBytes)) {
+            if (DataFile.TryReadAllBytes(out var fileBytes)) {
                 try {
                     _dataCache = JsonSerializer.Deserialize<Dictionary<string, object>>(fileBytes);
                 } catch (JsonParsingException) {
                     // File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file.
-                    var backupFilePath = storageFilePath + ".backup";
-                    File.Copy(_dataFile.Path, backupFilePath, true);
+                    var backupFilePath = DataFile.Path + ".backup";
+                    File.Copy(DataFile.Path, backupFilePath, true);
 
-                    _dataFile.TryWriteAllText("{}");
+                    DataFile.TryWriteAllText("{}");
                     _dataCache = new Dictionary<string, object>();
                 }
             } else {
                 // Probably file doesn't exist, initializing to empty stuff. 
-                _dataFile.TryWriteAllText("{}");
+                DataFile.TryWriteAllText("{}");
                 _dataCache = new Dictionary<string, object>();
             }
 

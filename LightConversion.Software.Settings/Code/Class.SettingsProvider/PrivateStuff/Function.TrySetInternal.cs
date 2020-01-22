@@ -7,7 +7,7 @@
                 _dataCache[key] = value;
                 var jsonBytes = Utf8Json.JsonSerializer.Serialize(_dataCache);
                 var prettyJsonBytes = Utf8Json.JsonSerializer.PrettyPrintByteArray(jsonBytes);
-                isOk = _dataFile.TryWriteAllBytes(prettyJsonBytes);
+                isOk = DataFile.TryWriteAllBytes(prettyJsonBytes);
             }
 
             return isOk;
