@@ -158,7 +158,7 @@ namespace LightConversion.Software.Settings.Tests {
                     isOk = reliableFile.TryWriteAllText("Some text");
                     Assert.IsFalse(isOk, "Must fail because file isn't accessible.");
                 } catch (Exception ex) {
-                    Assert.Fail("No exception should be thrown");
+                    Assert.Fail("No exception should be thrown", ex);
                 }
             }
         }
