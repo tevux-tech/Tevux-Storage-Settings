@@ -5,7 +5,12 @@
             value = 0;
 
             isOk = TryGetInternal(key, out var valueOfUnknownType);
-            if (isOk) isOk = TryConvert(valueOfUnknownType, out value);
+            if (isOk) {
+                if (TryConvert(valueOfUnknownType, out value) == false) {
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match integer.", "Function TryGet(out int)");
+                    isOk = false;
+                }
+            }
 
             return isOk;
         }
@@ -15,7 +20,12 @@
             value = 0;
 
             isOk = TryGetInternal(key, out var valueOfUnknownType);
-            if (isOk) isOk = TryConvert(valueOfUnknownType, out value);
+            if (isOk) {
+                if (TryConvert(valueOfUnknownType, out value) == false) {
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match double.", "Function TryGet(out double)");
+                    isOk = false;
+                }
+            }
 
             return isOk;
         }
@@ -25,7 +35,12 @@
             value = false;
 
             isOk = TryGetInternal(key, out var valueOfUnknownType);
-            if (isOk) isOk = TryConvert(valueOfUnknownType, out value);
+            if (isOk) {
+                if (TryConvert(valueOfUnknownType, out value) == false) {
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match boolean.", "Function TryGet(out bool)");
+                    isOk = false;
+                }
+            }
 
             return isOk;
         }
@@ -35,7 +50,12 @@
             value = "";
 
             isOk = TryGetInternal(key, out var valueOfUnknownType);
-            if (isOk) isOk = TryConvert(valueOfUnknownType, out value);
+            if (isOk) {
+                if (TryConvert(valueOfUnknownType, out value) == false) {
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match string.", "Function TryGet(out string)");
+                    isOk = false;
+                }
+            }
 
             return isOk;
         }

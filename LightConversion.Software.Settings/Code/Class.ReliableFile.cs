@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 
 namespace LightConversion.Software.Settings {
-    public class ReliableFile {
+    public class ReliableFile : ISilentReporter {
         private enum FileHealth {
             Intact,
             Recoverable,
@@ -14,6 +15,9 @@ namespace LightConversion.Software.Settings {
         private readonly string _rf2FilePath;
         private readonly object _lock = new object();
         public string Path { get; }
+        public bool AreExceptionsSilent { get; set; }
+        public event GeneralEventHandler ErrorOccurred;
+        public event GeneralEventHandler InfoReady;
 
         public ReliableFile(string filePath) {
             // Building all the file paths we'll be using in this class.
@@ -23,7 +27,7 @@ namespace LightConversion.Software.Settings {
         }
 
         public bool Initialize() {
-            var returnValue = false;
+            var isOk = false;
             var mainFileExists = false;
             var rf1FileExists = false;
             var rf2FileExists = false;
@@ -48,33 +52,47 @@ namespace LightConversion.Software.Settings {
             // Taking action to fix file, if issues present.
             if (state == FileHealth.Intact) {
                 // All good, file structure is intact.
-                returnValue = true;
-            }
-
-            if (state == FileHealth.Recoverable) {
+                isOk = true;
+            } else if (state == FileHealth.Recoverable) {
                 // Something is not right, but rf2 is present, so restoring from it.
+                HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\"", "Function Initialize()");
+
                 lock (_lock) {
-                    File.Delete(Path);
-                    File.Delete(_rf1FilePath);
-                    File.Move(_rf2FilePath, Path);
+                    try {
+                        File.Delete(Path);
+                        File.Delete(_rf1FilePath);
+                        File.Move(_rf2FilePath, Path);
+                        isOk = true;
+                    } catch (IOException ex) {
+                        HandleNonCriticalError($"File recovery from \"{_rf1FilePath}\" failed because of IOException.", "Function Initialize()", ex);
+                        isOk = false;
+                    }
                 }
-
-                returnValue = true;
-            }
-
-            if (state == FileHealth.Littered) {
+            } else if (state == FileHealth.Littered) {
                 // Last write is probably lost, but main file is still there. Just cleaning up.
-                File.Delete(_rf1FilePath);
-                returnValue = true;
-            }
+                HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.", "Function Initialize()");
 
-            if (state == FileHealth.Unrecoverable) {
+                try {
+                    File.Delete(_rf1FilePath);
+                    isOk = true;
+                } catch (IOException ex) {
+                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", "Function Initialize()", ex);
+                    isOk = false;
+                }
+            } else if (state == FileHealth.Unrecoverable) {
                 // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
-                File.Delete(_rf1FilePath);
-                returnValue = true;
+                HandleNonCriticalError("File is unrecoverable. Probably last saving crashed at some point.", "Function Initialize()");
+
+                try {
+                    File.Delete(_rf1FilePath);
+                    isOk = true;
+                } catch (IOException ex) {
+                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", "Function Initialize()", ex);
+                    isOk = false;
+                }
             }
 
-            return returnValue;
+            return isOk;
         }
 
         public bool Exists() {
@@ -83,7 +101,7 @@ namespace LightConversion.Software.Settings {
 
         public bool TryReadAllText(out string fileContent) {
             var isOk = TryReadAllBytes(out var fileBytes);
-            
+
             if (isOk) fileContent = Encoding.UTF8.GetString(fileBytes);
             else fileContent = "";
 
@@ -96,9 +114,15 @@ namespace LightConversion.Software.Settings {
             fileContent = new byte[0];
             lock (_lock) {
                 if (File.Exists(Path)) {
-                    fileContent = File.ReadAllBytes(Path);
-                    returnValue = true;
+                    try {
+                        fileContent = File.ReadAllBytes(Path);
+                        returnValue = true;
+                    } catch (IOException ex) {
+                        HandleNonCriticalError("Reading file failed because of IOException.", "Function TryReadAllBytes()", ex);
+                        returnValue = false;
+                    }
                 } else {
+                    HandleNonCriticalError("Reading file failed because it doesn't exist.", "Function TryReadAllBytes()");
                     returnValue = false;
                 }
             }
@@ -111,16 +135,40 @@ namespace LightConversion.Software.Settings {
         }
 
         public bool TryWriteAllBytes(byte[] bytesToWrite) {
-            var returnValue = false;
+            bool returnValue;
+
             lock (_lock) {
-                File.WriteAllBytes(_rf1FilePath, bytesToWrite);
-                File.Move(_rf1FilePath, _rf2FilePath);
-                File.Delete(Path);
-                File.Move(_rf2FilePath, Path);
-                returnValue = true;
+                try {
+                    File.WriteAllBytes(_rf1FilePath, bytesToWrite);
+                    File.Move(_rf1FilePath, _rf2FilePath);
+                    File.Delete(Path);
+                    File.Move(_rf2FilePath, Path);
+                    returnValue = true;
+                } catch (IOException ex) {
+                    HandleNonCriticalError("Writing to file failed because of IOException.", "Function TryWriteAllBytes()", ex);
+                    returnValue = false;
+                }
             }
 
             return returnValue;
+        }
+
+        private void HandleInfoReady(string message, string source = "", object additionalInfo = null) {
+            InfoReady?.Invoke(this, new GeneralEventArgs(message, source, additionalInfo));
+        }
+
+        private void HandleNonCriticalError(string message, string source = "", Exception innerException = null) {
+            var fullMessage = message;
+            if (innerException != null) {
+                fullMessage += "\r\n\r\n Original exception:\r\n";
+                var tempException = innerException;
+                while (tempException != null) {
+                    fullMessage += tempException.Message;
+                    tempException = tempException.InnerException;
+                }
+            }
+
+            ErrorOccurred?.Invoke(this, new GeneralEventArgs(fullMessage, source, innerException));
         }
     }
 }
