@@ -10,6 +10,10 @@
                 isOk = DataFile.TryWriteAllBytes(prettyJsonBytes);
             }
 
+            if (isOk == false) {
+                HandleNonCriticalError($"Setting setting \"{key}\" to {value} failed because writing to file failed.", "Function TrySetInternal()");
+            }
+
             return isOk;
         }
     }
