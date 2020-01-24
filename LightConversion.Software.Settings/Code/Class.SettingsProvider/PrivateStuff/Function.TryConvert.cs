@@ -1,4 +1,5 @@
 ﻿using System;
+using Utf8Json;
 
 namespace LightConversion.Software.Settings {
     public partial class SettingsProvider {
@@ -58,6 +59,26 @@ namespace LightConversion.Software.Settings {
                 convertedValue = "";
                 return false;
             }
+        }
+
+        private bool TryConvert(object valueToConvert, out DateTime convertedValue) {
+            var isOk = true;
+
+            if (valueToConvert is DateTime valueAsDateTime) {
+                convertedValue = valueAsDateTime;
+            } else if (valueToConvert is string valueAsString) {
+                try {
+                    convertedValue = JsonSerializer.Deserialize<DateTime>($"\"{valueAsString}\"");
+                } catch (Exception) {
+                    convertedValue = DateTime.MinValue;
+                    isOk = false;
+                }
+            } else {
+                convertedValue = DateTime.MinValue;
+                isOk = false;
+            }
+
+            return isOk;
         }
     }
 }
