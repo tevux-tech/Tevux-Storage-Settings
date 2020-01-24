@@ -30,6 +30,11 @@ namespace LightConversion.Software.Settings.Tests {
             settings.TrySet("SomeStringKey", "Some string");
             settings.TryGet("SomeStringKey", out string someStringValue);
             Assert.AreEqual("Some string", someStringValue);
+
+            var someDateTimeToSet = DateTime.Now;
+            settings.TrySet("SomeDateTimeKey", someDateTimeToSet);
+            settings.TryGet("SomeDateTimeKey", out DateTime someDateTimeValue);
+            Assert.AreEqual(someDateTimeToSet, someDateTimeValue);
         }
 
         [TestMethod]
@@ -76,13 +81,18 @@ namespace LightConversion.Software.Settings.Tests {
             isOk = settings.TrySet("SomeStringKey", "Hello world");
             Assert.IsTrue(isOk);
 
+            var someDateTime = new DateTime(1234, 5, 6, 7, 8, 9);
+            isOk = settings.TrySet("SomeDateTimeKey", someDateTime);
+            Assert.IsTrue(isOk);
+
             var isFilePresent = File.Exists("temp/someSettings.json");
             Assert.IsTrue(isFilePresent);
 
             var actualFileContents = File.ReadAllText("temp/someSettings.json");
             var expectedFileContents = @"{
   ""SomeDoubleKey"": 3.1415,
-  ""SomeStringKey"": ""Hello world""
+  ""SomeStringKey"": ""Hello world"",
+  ""SomeDateTimeKey"": ""1234-05-06T07:08:09""
 }";
             Assert.AreEqual(expectedFileContents, actualFileContents);
         }
@@ -156,6 +166,40 @@ namespace LightConversion.Software.Settings.Tests {
             } catch (Exception ex) {
                 Assert.Fail("No exception should be thrown", ex);
             }
+        }
+
+        [TestMethod]
+        public void TestLoadingDateTime() {
+            var json = @"{
+              ""SomeDateTimeKey"": ""1234-05-06T07:08:09""
+            }";
+
+            var reliableFile = new ReliableFile("temp/someSettings.json");
+            reliableFile.TryWriteAllText(json);
+
+            var settings = new SettingsProvider();
+            settings.Initialize(reliableFile);
+
+            var isOk = settings.TryGet("SomeDateTimeKey", out DateTime loadedDateTime);
+            Assert.IsTrue(isOk);
+
+            Assert.AreEqual(new DateTime(1234, 5, 6, 7, 8, 9), loadedDateTime);
+        }
+
+        [TestMethod]
+        public void TestLoadingInvalidDateTime() {
+            var json = @"{
+              ""SomeDateTimeKey"": ""1234-05-06T99:08:09""
+            }";
+
+            var reliableFile = new ReliableFile("temp/someSettings.json");
+            reliableFile.TryWriteAllText(json);
+
+            var settings = new SettingsProvider();
+            settings.Initialize(reliableFile);
+
+            var isOk = settings.TryGet("SomeDateTimeKey", out DateTime loadedDateTime);
+            Assert.IsFalse(isOk);
         }
 
         private void CreateCleanTempFolder() {
