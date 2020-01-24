@@ -1,4 +1,6 @@
-﻿namespace LightConversion.Software.Settings {
+﻿using System;
+
+namespace LightConversion.Software.Settings {
     public partial class SettingsProvider {
         public bool TrySet(string key, int value) {
             return TrySetInternal<int>(key, value);
@@ -14,6 +16,10 @@
 
         public bool TrySet(string key, bool value) {
             return TrySetInternal<bool>(key, value);
+        }
+
+        public bool TrySet(string key, DateTime value) {
+            return TrySetInternal<DateTime>(key, value);
         }
     }
 }
