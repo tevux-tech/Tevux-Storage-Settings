@@ -5,9 +5,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("LightConversion.Software.Settings.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Light Conversion")]
 [assembly: AssemblyProduct("LightConversion.Software.Settings.Tests")]
-[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyCopyright("Copyright © 2020 Light Conversion, UAB")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
