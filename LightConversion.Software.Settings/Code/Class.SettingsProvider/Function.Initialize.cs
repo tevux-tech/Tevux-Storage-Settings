@@ -2,7 +2,7 @@
 using System.IO;
 using Utf8Json;
 
-namespace LightConversion.Software.Settings {
+namespace LightConversion.Storage.Settings {
     public partial class SettingsProvider {
         public void Initialize(ReliableFile dataFile) {
             DataFile = dataFile;

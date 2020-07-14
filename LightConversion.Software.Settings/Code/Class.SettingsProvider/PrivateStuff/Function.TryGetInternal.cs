@@ -1,4 +1,4 @@
-﻿namespace LightConversion.Software.Settings {
+﻿namespace LightConversion.Storage.Settings {
     public partial class SettingsProvider {
         private bool TryGetInternal(string key, out object value) {
             bool isOk;

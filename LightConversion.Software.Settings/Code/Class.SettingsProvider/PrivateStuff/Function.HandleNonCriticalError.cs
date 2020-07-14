@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LightConversion.Software.Settings {
+namespace LightConversion.Storage.Settings {
     public partial class SettingsProvider {
         private void HandleNonCriticalError(string message, string source = "", Exception innerException = null) {
             var fullMessage = message;

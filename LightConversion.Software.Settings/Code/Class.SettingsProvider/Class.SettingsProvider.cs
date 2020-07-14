@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace LightConversion.Software.Settings {
+namespace LightConversion.Storage.Settings {
     public partial class SettingsProvider : ISilentReporter {
         private Dictionary<string, object> _dataCache;
         private readonly object _dataLock = new object();
