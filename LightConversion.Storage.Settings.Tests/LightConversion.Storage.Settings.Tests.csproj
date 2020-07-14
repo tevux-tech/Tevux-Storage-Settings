@@ -71,7 +71,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LightConversion.Software.Settings\LightConversion.Storage.Settings.csproj">
+    <ProjectReference Include="..\LightConversion.Storage.Settings\LightConversion.Storage.Settings.csproj">
       <Project>{c603865c-bb15-4678-9829-b5eb41dac376}</Project>
       <Name>LightConversion.Storage.Settings</Name>
     </ProjectReference>
