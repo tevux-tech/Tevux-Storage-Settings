@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace LightConversion.Software.Settings {
+namespace LightConversion.Storage.Settings {
     public class ReliableFile : ISilentReporter {
         private enum FileHealth {
             Intact,

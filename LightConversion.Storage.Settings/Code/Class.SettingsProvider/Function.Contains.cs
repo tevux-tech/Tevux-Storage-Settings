@@ -1,4 +1,4 @@
-﻿namespace LightConversion.Software.Settings {
+﻿namespace LightConversion.Storage.Settings {
     public partial class SettingsProvider {
         public bool Contains(string key) {
             lock (_dataLock) {

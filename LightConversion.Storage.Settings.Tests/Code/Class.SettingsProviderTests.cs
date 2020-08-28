@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LightConversion.Software.Settings.Tests {
@@ -200,6 +201,31 @@ namespace LightConversion.Software.Settings.Tests {
 
             var isOk = settings.TryGet("SomeDateTimeKey", out DateTime loadedDateTime);
             Assert.IsFalse(isOk);
+        }
+
+        [TestMethod]
+        public void TestRemove() {
+            CreateCleanTempFolder();
+
+            var settings = new SettingsProvider();
+            settings.Initialize(new ReliableFile("temp/someSettings.json"));
+
+            settings.TrySet("SomeIntegerKey1", 123);
+            settings.TrySet("SomeIntegerKey2", 456);
+
+            var isOk = settings.TryRemove("SomeIntegerKey1");
+            Assert.IsTrue(isOk);
+
+            isOk = settings.TryRemove("InvalidKey");
+            Assert.IsFalse(isOk);
+
+            Assert.IsFalse(settings.Contains("SomeIntegerKey1"));
+            Assert.IsTrue(settings.Contains("SomeIntegerKey2"));
+
+            var settings2 = new SettingsProvider();
+            settings2.Initialize(new ReliableFile("temp/someSettings.json"));
+            Assert.IsFalse(settings2.Contains("SomeIntegerKey1"));
+            Assert.IsTrue(settings2.Contains("SomeIntegerKey2"));
         }
 
         private void CreateCleanTempFolder() {

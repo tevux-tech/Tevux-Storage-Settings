@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LightConversion.Software.Settings {
+namespace LightConversion.Storage.Settings {
     public partial class SettingsProvider {
         public bool TryGet(string key, out int value) {
             bool isOk;

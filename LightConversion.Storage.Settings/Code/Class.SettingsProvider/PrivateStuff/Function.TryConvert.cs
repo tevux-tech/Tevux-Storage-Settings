@@ -1,7 +1,7 @@
 ﻿using System;
 using Utf8Json;
 
-namespace LightConversion.Software.Settings {
+namespace LightConversion.Storage.Settings {
     public partial class SettingsProvider {
         private bool TryConvert(object valueToConvert, out int convertedValue) {
             var isOk = true;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LightConversion.Software.Settings.Tests {
