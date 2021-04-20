@@ -16,8 +16,10 @@ namespace LightConversion.Storage.Settings {
         private readonly object _lock = new object();
         public string Path { get; }
         public bool AreExceptionsSilent { get; set; }
+        private FileSystemWatcher _fileWatcher;
         public event GeneralEventHandler ErrorOccurred;
         public event GeneralEventHandler InfoReady;
+        public event GeneralEventHandler Changed;
 
         public ReliableFile(string filePath) {
             // Building all the file paths we'll be using in this class.
@@ -90,6 +92,25 @@ namespace LightConversion.Storage.Settings {
                     HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", "Function Initialize()", ex);
                     isOk = false;
                 }
+            }
+
+
+            // Initialize file system watcher.
+            var fileDirectory = System.IO.Path.GetDirectoryName(Path);
+            if (fileDirectory != null) {
+                var fileName = System.IO.Path.GetFileName(Path);
+                _fileWatcher = new FileSystemWatcher(fileDirectory);
+                //  _fileWatcher.NotifyFilter = /*NotifyFilters.Attributes |*/ /*NotifyFilters.CreationTime |*/ NotifyFilters.DirectoryName | NotifyFilters.FileName | /*NotifyFilters.LastAccess |*/ NotifyFilters.LastWrite /*| NotifyFilters.Security*/ /*| NotifyFilters.Size*/;
+                _fileWatcher.Changed += OnChanged;
+                _fileWatcher.Created += OnCreated;
+                _fileWatcher.Deleted += OnDeleted;
+                _fileWatcher.Renamed += OnRenamed;
+                _fileWatcher.Error += OnError;
+                _fileWatcher.Filter = fileName;
+                // _fileWatcher.IncludeSubdirectories = true;
+                _fileWatcher.EnableRaisingEvents = true;
+            } else {
+                HandleNonCriticalError("Failed to create FileSystemWatcher because can't get directory name from path: " + Path);
             }
 
             return isOk;
@@ -169,6 +190,34 @@ namespace LightConversion.Storage.Settings {
             }
 
             ErrorOccurred?.Invoke(this, new GeneralEventArgs(fullMessage, source, innerException));
+        }
+
+        private void OnChanged(object sender, FileSystemEventArgs e) {
+            if (e.ChangeType != WatcherChangeTypes.Changed) {
+                return;
+            }
+
+            HandleInfoReady($"Changed: {Path}");
+            Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
+        }
+        
+        private void OnCreated(object sender, FileSystemEventArgs e) {
+            HandleInfoReady($"Created: {Path}");
+            Changed?.Invoke(this, new GeneralEventArgs($"Created: {Path}"));
+        }
+
+        private void OnDeleted(object sender, FileSystemEventArgs e) {
+            HandleInfoReady($"Deleted: {Path}");
+            Changed?.Invoke(this, new GeneralEventArgs($"Deleted: {Path}"));
+        }
+
+        private void OnRenamed(object sender, FileSystemEventArgs e) {
+            HandleInfoReady($"Renamed: {Path}");
+            Changed?.Invoke(this, new GeneralEventArgs($"Renamed: {Path}"));
+        }
+
+        private void OnError(object sender, ErrorEventArgs e) {
+            HandleNonCriticalError("Error happened in FileSystemWatcher, message:" + e.GetException().Message);
         }
     }
 }
