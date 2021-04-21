@@ -94,23 +94,24 @@ namespace LightConversion.Storage.Settings {
                 }
             }
 
-
             // Initialize file system watcher.
-            var fileDirectory = System.IO.Path.GetDirectoryName(Path);
-            if (fileDirectory != null) {
-                var fileName = System.IO.Path.GetFileName(Path);
-                _fileWatcher = new FileSystemWatcher(fileDirectory);
-                //  _fileWatcher.NotifyFilter = /*NotifyFilters.Attributes |*/ /*NotifyFilters.CreationTime |*/ NotifyFilters.DirectoryName | NotifyFilters.FileName | /*NotifyFilters.LastAccess |*/ NotifyFilters.LastWrite /*| NotifyFilters.Security*/ /*| NotifyFilters.Size*/;
-                _fileWatcher.Changed += OnChanged;
-                _fileWatcher.Created += OnCreated;
-                _fileWatcher.Deleted += OnDeleted;
-                _fileWatcher.Renamed += OnRenamed;
-                _fileWatcher.Error += OnError;
-                _fileWatcher.Filter = fileName;
-                // _fileWatcher.IncludeSubdirectories = true;
-                _fileWatcher.EnableRaisingEvents = true;
-            } else {
-                HandleNonCriticalError("Failed to create FileSystemWatcher because can't get directory name from path: " + Path);
+            try {
+                var fileDirectory = System.IO.Path.GetDirectoryName(Path);
+                if (fileDirectory != null) {
+                    var fileName = System.IO.Path.GetFileName(Path);
+                    _fileWatcher = new FileSystemWatcher(fileDirectory);
+                    _fileWatcher.Changed += OnChanged;
+                    _fileWatcher.Created += OnCreated;
+                    _fileWatcher.Deleted += OnDeleted;
+                    _fileWatcher.Renamed += OnRenamed;
+                    _fileWatcher.Error += OnError;
+                    _fileWatcher.Filter = fileName;
+                    _fileWatcher.EnableRaisingEvents = true;
+                } else {
+                    HandleNonCriticalError("Failed to create FileSystemWatcher because can't get directory name from path: " + Path);
+                }
+            } catch (Exception ex) {
+                HandleNonCriticalError("Error while initializing file system watcher, error message:" + ex.Message);
             }
 
             return isOk;
@@ -200,7 +201,7 @@ namespace LightConversion.Storage.Settings {
             HandleInfoReady($"Changed: {Path}");
             Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
         }
-        
+
         private void OnCreated(object sender, FileSystemEventArgs e) {
             HandleInfoReady($"Created: {Path}");
             Changed?.Invoke(this, new GeneralEventArgs($"Created: {Path}"));
