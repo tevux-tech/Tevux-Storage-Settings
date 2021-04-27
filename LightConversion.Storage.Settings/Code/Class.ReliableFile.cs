@@ -14,6 +14,7 @@ namespace LightConversion.Storage.Settings {
         private readonly string _rf1FilePath;
         private readonly string _rf2FilePath;
         private readonly object _lock = new object();
+        private bool _isInitialized = false;
         private DateTime _lastWriteDate;
         public string Path { get; }
         public bool AreExceptionsSilent { get; set; }
@@ -30,6 +31,8 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool Initialize() {
+            if (_isInitialized) return true;
+
             var isOk = false;
             var mainFileExists = false;
             var rf1FileExists = false;
@@ -115,14 +118,17 @@ namespace LightConversion.Storage.Settings {
                 HandleNonCriticalError("Error while initializing file system watcher, error message:" + ex.Message);
             }
 
+            _isInitialized = true;
             return isOk;
         }
 
         public bool Exists() {
+            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
             return File.Exists(Path);
         }
 
         public bool TryReadAllText(out string fileContent) {
+            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
             var isOk = TryReadAllBytes(out var fileBytes);
 
             if (isOk) fileContent = Encoding.UTF8.GetString(fileBytes);
@@ -132,6 +138,7 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool TryReadAllBytes(out byte[] fileContent) {
+            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
             bool returnValue;
 
             fileContent = new byte[0];
@@ -154,10 +161,12 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool TryWriteAllText(string textToWrite) {
+            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
             return TryWriteAllBytes(Encoding.UTF8.GetBytes(textToWrite));
         }
 
         public bool TryWriteAllBytes(byte[] bytesToWrite) {
+            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
             bool returnValue;
 
             lock (_lock) {
@@ -221,7 +230,6 @@ namespace LightConversion.Storage.Settings {
                 Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
             }
         }
-
 
         private void OnCreatedOrRenamed(object sender, FileSystemEventArgs e) {
             if (Exists() == false) return;
