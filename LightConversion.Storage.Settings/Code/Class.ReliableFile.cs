@@ -100,7 +100,6 @@ namespace LightConversion.Storage.Settings {
                 if (fileDirectory != null) {
                     var fileName = System.IO.Path.GetFileName(Path);
                     _fileWatcher = new FileSystemWatcher(fileDirectory);
-                    _fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
                     _fileWatcher.Changed += OnChanged;
                     _fileWatcher.Created += OnCreated;
                     _fileWatcher.Renamed += OnRenamed;
