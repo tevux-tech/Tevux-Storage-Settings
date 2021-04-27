@@ -100,9 +100,9 @@ namespace LightConversion.Storage.Settings {
                 if (fileDirectory != null) {
                     var fileName = System.IO.Path.GetFileName(Path);
                     _fileWatcher = new FileSystemWatcher(fileDirectory);
+                    _fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
                     _fileWatcher.Changed += OnChanged;
                     _fileWatcher.Created += OnCreated;
-                    _fileWatcher.Deleted += OnDeleted;
                     _fileWatcher.Renamed += OnRenamed;
                     _fileWatcher.Error += OnError;
                     _fileWatcher.Filter = fileName;
@@ -205,11 +205,6 @@ namespace LightConversion.Storage.Settings {
         private void OnCreated(object sender, FileSystemEventArgs e) {
             HandleInfoReady($"Created: {Path}");
             Changed?.Invoke(this, new GeneralEventArgs($"Created: {Path}"));
-        }
-
-        private void OnDeleted(object sender, FileSystemEventArgs e) {
-            HandleInfoReady($"Deleted: {Path}");
-            Changed?.Invoke(this, new GeneralEventArgs($"Deleted: {Path}"));
         }
 
         private void OnRenamed(object sender, FileSystemEventArgs e) {
