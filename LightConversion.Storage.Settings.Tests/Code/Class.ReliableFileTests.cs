@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -163,6 +164,27 @@ namespace LightConversion.Software.Settings.Tests {
                 }
             }
         }
+
+        [TestMethod]
+        public async Task TestChangedEvent() {
+            CreateCleanTempFolder();
+            
+            var reliableFile = new ReliableFile("temp/someFile.txt");
+            reliableFile.Initialize();
+
+            var isChangedHappened = false;
+            reliableFile.Changed += (sender, args) => {
+                isChangedHappened = true;
+            };
+
+            reliableFile.TryWriteAllText("Changing file content.");
+
+            // We need to release main thread and wait for changed event.
+            await Task.Delay(1);
+            
+            Assert.IsTrue(isChangedHappened);
+        }
+
 
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
