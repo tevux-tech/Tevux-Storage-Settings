@@ -101,8 +101,8 @@ namespace LightConversion.Storage.Settings {
                     var fileName = System.IO.Path.GetFileName(Path);
                     _fileWatcher = new FileSystemWatcher(fileDirectory);
                     _fileWatcher.Changed += OnChanged;
-                    _fileWatcher.Created += OnCreated;
-                    _fileWatcher.Renamed += OnRenamed;
+                    _fileWatcher.Created += OnChanged;
+                    _fileWatcher.Renamed += OnChanged;
                     _fileWatcher.Error += OnError;
                     _fileWatcher.Filter = fileName;
                     _fileWatcher.EnableRaisingEvents = true;
@@ -193,22 +193,8 @@ namespace LightConversion.Storage.Settings {
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e) {
-            if (e.ChangeType != WatcherChangeTypes.Changed) {
-                return;
-            }
-
-            HandleInfoReady($"Changed: {Path}");
+            HandleInfoReady($"{e.ChangeType}: {Path}");
             Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
-        }
-
-        private void OnCreated(object sender, FileSystemEventArgs e) {
-            HandleInfoReady($"Created: {Path}");
-            Changed?.Invoke(this, new GeneralEventArgs($"Created: {Path}"));
-        }
-
-        private void OnRenamed(object sender, FileSystemEventArgs e) {
-            HandleInfoReady($"Renamed: {Path}");
-            Changed?.Invoke(this, new GeneralEventArgs($"Renamed: {Path}"));
         }
 
         private void OnError(object sender, ErrorEventArgs e) {
