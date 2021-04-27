@@ -160,14 +160,25 @@ namespace LightConversion.Storage.Settings {
 
             lock (_lock) {
                 try {
+                    // Let's not rise multiple Changed event with single write operation. Disabling watcher for now.
+                    _fileWatcher.EnableRaisingEvents = false;
+
                     File.WriteAllBytes(_rf1FilePath, bytesToWrite);
                     File.Move(_rf1FilePath, _rf2FilePath);
                     File.Delete(Path);
+
+                    // Enabling watcher before last file operation so we get only one Changed event.
+                    _fileWatcher.EnableRaisingEvents = true;
                     File.Move(_rf2FilePath, Path);
                     returnValue = true;
                 } catch (IOException ex) {
                     HandleNonCriticalError("Writing to file failed because of IOException.", "Function TryWriteAllBytes()", ex);
                     returnValue = false;
+                } finally {
+                    // Make sure to reenable watcher before leaving method.
+                    if (_fileWatcher.EnableRaisingEvents == false) {
+                        _fileWatcher.EnableRaisingEvents = true;
+                    }
                 }
             }
 
