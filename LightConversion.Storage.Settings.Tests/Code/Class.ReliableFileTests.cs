@@ -165,25 +165,70 @@ namespace LightConversion.Software.Settings.Tests {
             }
         }
 
+        #region Changed event tests.
+
         [TestMethod]
-        public async Task TestChangedEvent() {
+        public async Task TestChangedEventWithInternalWrite() {
             CreateCleanTempFolder();
-            
+
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
-            var isChangedHappened = false;
+            var hangedCounter = 0;
             reliableFile.Changed += (sender, args) => {
-                isChangedHappened = true;
+                hangedCounter += 1;
             };
 
             reliableFile.TryWriteAllText("Changing file content.");
 
             // We need to release main thread and wait for changed event.
-            await Task.Delay(1);
-            
-            Assert.IsTrue(isChangedHappened);
+            await Task.Delay(1000);
+
+            Assert.AreEqual(hangedCounter, 1);
         }
+
+        [TestMethod]
+        public async Task TestChangedEventWithExternalEdit() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new ReliableFile("temp/someFile.txt");
+            reliableFile.Initialize();
+
+            var hangedCounter = 0;
+            reliableFile.Changed += (sender, args) => {
+                hangedCounter += 1;
+            };
+
+            File.AppendAllText("temp/someFile.txt", "External file edit.");
+
+            // We need to release main thread and wait for changed event.
+            await Task.Delay(10);
+
+            Assert.AreEqual(hangedCounter, 1);
+        }
+
+        [TestMethod]
+        public async Task TestChangedEventWithExternalRecreate() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new ReliableFile("temp/someFile.txt");
+            reliableFile.Initialize();
+
+            var hangedCounter = 0;
+            reliableFile.Changed += (sender, args) => {
+                hangedCounter += 1;
+            };
+
+            File.Delete("temp/someFile.txt");
+            File.WriteAllText("temp/someFile.txt", "Created externally.");
+
+            // We need to release main thread and wait for changed event.
+            await Task.Delay(10);
+
+            Assert.AreEqual(hangedCounter, 1);
+        }
+
+        #endregion
 
 
         private void CreateCleanTempFolder() {

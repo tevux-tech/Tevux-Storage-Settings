@@ -14,6 +14,7 @@ namespace LightConversion.Storage.Settings {
         private readonly string _rf1FilePath;
         private readonly string _rf2FilePath;
         private readonly object _lock = new object();
+        private DateTime _lastWriteDate;
         public string Path { get; }
         public bool AreExceptionsSilent { get; set; }
         private FileSystemWatcher _fileWatcher;
@@ -33,6 +34,7 @@ namespace LightConversion.Storage.Settings {
             var mainFileExists = false;
             var rf1FileExists = false;
             var rf2FileExists = false;
+            
             // Checking what is on the disk.
             lock (_lock) {
                 mainFileExists = File.Exists(Path);
@@ -101,8 +103,8 @@ namespace LightConversion.Storage.Settings {
                     var fileName = System.IO.Path.GetFileName(Path);
                     _fileWatcher = new FileSystemWatcher(fileDirectory);
                     _fileWatcher.Changed += OnChanged;
-                    _fileWatcher.Created += OnChanged;
-                    _fileWatcher.Renamed += OnChanged;
+                    _fileWatcher.Created += OnCreatedOrRenamed;
+                    _fileWatcher.Renamed += OnCreatedOrRenamed;
                     _fileWatcher.Error += OnError;
                     _fileWatcher.Filter = fileName;
                     _fileWatcher.EnableRaisingEvents = true;
@@ -204,6 +206,27 @@ namespace LightConversion.Storage.Settings {
         }
 
         private void OnChanged(object sender, FileSystemEventArgs e) {
+            if (Exists() == false) return;
+
+            var isChanged = true;
+            if (e.ChangeType == WatcherChangeTypes.Changed) {
+                var newLastWriteDate = File.GetLastWriteTime(Path);
+                if (_lastWriteDate == newLastWriteDate) isChanged = false;
+                _lastWriteDate = newLastWriteDate;
+            }
+
+            HandleInfoReady($"{e.ChangeType}: {Path}");
+
+            if (isChanged) {
+                Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
+            }
+        }
+
+
+        private void OnCreatedOrRenamed(object sender, FileSystemEventArgs e) {
+            if (Exists() == false) return;
+
+            _lastWriteDate = File.GetLastWriteTime(Path);
             HandleInfoReady($"{e.ChangeType}: {Path}");
             Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
         }
