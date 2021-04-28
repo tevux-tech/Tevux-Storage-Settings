@@ -168,7 +168,7 @@ namespace LightConversion.Software.Settings.Tests {
         #region Changed event tests.
 
         [TestMethod]
-        public async Task TestChangedEventWithInternalWrite() {
+        public async Task TestChangedEvenInternalWrite() {
             CreateCleanTempFolder();
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
@@ -184,11 +184,50 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(1000);
 
-            Assert.AreEqual(hangedCounter, 1);
+            Assert.AreEqual(1, hangedCounter);
         }
 
         [TestMethod]
-        public async Task TestChangedEventWithExternalEdit() {
+        public async Task TestChangedEventLastFileContent() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new ReliableFile("temp/someFile.txt");
+            reliableFile.Initialize();
+
+            var lastFileContent = "";
+            reliableFile.Changed += (sender, args) => {
+                reliableFile.TryReadAllText(out lastFileContent);
+            };
+
+            reliableFile.TryWriteAllText("Changing file content.");
+
+            // We need to release main thread and wait for changed event.
+            await Task.Delay(10);
+            Assert.AreEqual("Changing file content.", lastFileContent);
+            
+            reliableFile.TryWriteAllText("Changing 2nd time.");
+
+            await Task.Delay(10);
+            Assert.AreEqual("Changing 2nd time.", lastFileContent);
+
+            reliableFile.TryWriteAllText("Changing 3rd time.");
+
+            await Task.Delay(10);
+            Assert.AreEqual("Changing 3rd time.", lastFileContent);
+
+            reliableFile.TryWriteAllText("Changing 4th time.");
+
+            await Task.Delay(10);
+            Assert.AreEqual("Changing 4th time.", lastFileContent);
+
+            reliableFile.TryWriteAllText("Changing 5th time.");
+
+            await Task.Delay(10);
+            Assert.AreEqual("Changing 5th time.", lastFileContent);
+        }
+
+        [TestMethod]
+        public async Task TestChangedEventExternalWrite() {
             CreateCleanTempFolder();
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
@@ -204,12 +243,14 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(10);
 
-            Assert.AreEqual(hangedCounter, 1);
+            Assert.AreEqual(1, hangedCounter);
         }
 
         [TestMethod]
-        public async Task TestChangedEventWithExternalRecreate() {
+        public async Task TestChangedEventRecreate() {
             CreateCleanTempFolder();
+
+            File.WriteAllText("temp/someFile.txt", "Creating file.");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
@@ -225,7 +266,57 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(10);
 
-            Assert.AreEqual(hangedCounter, 1);
+            Assert.AreEqual(1, hangedCounter);
+        }
+
+        [TestMethod]
+        public async Task TestChangedEventMove() {
+            CreateCleanTempFolder();
+
+            File.WriteAllText("temp/someFile.txt", "Creating file.");
+            var reliableFile = new ReliableFile("temp/someFile.txt");
+            reliableFile.Initialize();
+
+            var hangedCounter = 0;
+            reliableFile.Changed += (sender, args) => {
+                hangedCounter += 1;
+            };
+
+            // Create second temp folder to move to.
+            Directory.CreateDirectory("temp2");
+
+            // Moving file this should generate single changed event.
+            File.Move("temp/someFile.txt", "temp2/someFile.txt");
+            File.Move("temp2/someFile.txt", "temp/someFile.txt");
+
+            // We need to release main thread and wait for changed event.
+            await Task.Delay(10);
+
+            Assert.AreEqual(1, hangedCounter);
+
+            // Remove temp folder so no trash is left.
+            Directory.Delete("temp2", true);
+        }
+
+        [TestMethod]
+        public async Task TestChangedEventExternalDelete() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new ReliableFile("temp/someFile.txt");
+            reliableFile.Initialize();
+
+            var hangedCounter = 0;
+            reliableFile.Changed += (sender, args) => {
+                hangedCounter += 1;
+            };
+
+            File.Delete("temp/someFile.txt");
+
+            // We need to release main thread and wait for changed event.
+            await Task.Delay(10);
+
+            // Delete should not rise any changed event.
+            Assert.AreEqual(0, hangedCounter);
         }
 
         #endregion

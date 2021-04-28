@@ -14,7 +14,7 @@ namespace LightConversion.Storage.Settings {
         private readonly string _rf1FilePath;
         private readonly string _rf2FilePath;
         private readonly object _lock = new object();
-        private bool _isInitialized = false;
+        private bool _isInitialized;
         private DateTime _lastWriteDate;
         public string Path { get; }
         public bool AreExceptionsSilent { get; set; }
@@ -105,9 +105,9 @@ namespace LightConversion.Storage.Settings {
                 if (fileDirectory != null) {
                     var fileName = System.IO.Path.GetFileName(Path);
                     _fileWatcher = new FileSystemWatcher(fileDirectory);
-                    _fileWatcher.Changed += OnChanged;
-                    _fileWatcher.Created += OnCreatedOrRenamed;
-                    _fileWatcher.Renamed += OnCreatedOrRenamed;
+                    _fileWatcher.Changed += HandleFileChangedEvent;
+                    _fileWatcher.Created += HandleFileCreatedEvent;
+                    _fileWatcher.Renamed += HandleFileCreatedEvent;
                     _fileWatcher.Error += OnError;
                     _fileWatcher.Filter = fileName;
                     _fileWatcher.EnableRaisingEvents = true;
@@ -214,9 +214,10 @@ namespace LightConversion.Storage.Settings {
             ErrorOccurred?.Invoke(this, new GeneralEventArgs(fullMessage, source, innerException));
         }
 
-        private void OnChanged(object sender, FileSystemEventArgs e) {
+        private void HandleFileChangedEvent(object sender, FileSystemEventArgs e) {
             if (Exists() == false) return;
 
+            // When file is edited it rises multiple Changed events. Let's only rise Changed event when file content changes. 
             var isChanged = true;
             if (e.ChangeType == WatcherChangeTypes.Changed) {
                 var newLastWriteDate = File.GetLastWriteTime(Path);
@@ -225,15 +226,15 @@ namespace LightConversion.Storage.Settings {
             }
 
             HandleInfoReady($"{e.ChangeType}: {Path}");
-
             if (isChanged) {
                 Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
             }
         }
 
-        private void OnCreatedOrRenamed(object sender, FileSystemEventArgs e) {
+        private void HandleFileCreatedEvent(object sender, FileSystemEventArgs e) {
             if (Exists() == false) return;
 
+            // It's a new file to watch so last write date is current.
             _lastWriteDate = File.GetLastWriteTime(Path);
             HandleInfoReady($"{e.ChangeType}: {Path}");
             Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
