@@ -182,7 +182,27 @@ namespace LightConversion.Software.Settings.Tests {
             reliableFile.TryWriteAllText("Changing file content.");
 
             // We need to release main thread and wait for changed event.
-            await Task.Delay(1000);
+            await Task.Delay(10);
+
+            Assert.AreEqual(1, changedCounter);
+        }
+
+        [TestMethod]
+        public async Task TestChangedEvenWithoutFolder() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new ReliableFile("someFile.txt");
+            reliableFile.Initialize();
+
+            var changedCounter = 0;
+            reliableFile.Changed += (sender, args) => {
+                changedCounter += 1;
+            };
+
+            reliableFile.TryWriteAllText("Changing file content.");
+
+            // We need to release main thread and wait for changed event.
+            await Task.Delay(10);
 
             Assert.AreEqual(1, changedCounter);
         }

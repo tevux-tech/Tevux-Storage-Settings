@@ -37,7 +37,7 @@ namespace LightConversion.Storage.Settings {
             var mainFileExists = false;
             var rf1FileExists = false;
             var rf2FileExists = false;
-            
+
             // Checking what is on the disk.
             lock (_lock) {
                 mainFileExists = File.Exists(Path);
@@ -101,8 +101,8 @@ namespace LightConversion.Storage.Settings {
 
             // Initialize file system watcher.
             try {
-                var fileDirectory = System.IO.Path.GetDirectoryName(Path);
-                if (fileDirectory != null) {
+                var fileDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path));
+                if (string.IsNullOrEmpty(fileDirectory) == false) {
                     var fileName = System.IO.Path.GetFileName(Path);
                     _fileWatcher = new FileSystemWatcher(fileDirectory);
                     _fileWatcher.Changed += HandleFileChangedEvent;
@@ -172,14 +172,14 @@ namespace LightConversion.Storage.Settings {
             lock (_lock) {
                 try {
                     // Let's not rise multiple Changed event with single write operation. Disabling watcher for now.
-                    _fileWatcher.EnableRaisingEvents = false;
+                    if (_fileWatcher != null) _fileWatcher.EnableRaisingEvents = false;
 
                     File.WriteAllBytes(_rf1FilePath, bytesToWrite);
                     File.Move(_rf1FilePath, _rf2FilePath);
                     File.Delete(Path);
 
                     // Enabling watcher before last file operation so we get only one Changed event.
-                    _fileWatcher.EnableRaisingEvents = true;
+                    if (_fileWatcher != null) _fileWatcher.EnableRaisingEvents = true;
                     File.Move(_rf2FilePath, Path);
                     returnValue = true;
                 } catch (IOException ex) {
@@ -187,7 +187,7 @@ namespace LightConversion.Storage.Settings {
                     returnValue = false;
                 } finally {
                     // Make sure to reenable watcher before leaving method.
-                    if (_fileWatcher.EnableRaisingEvents == false) {
+                    if ((_fileWatcher != null) && (_fileWatcher.EnableRaisingEvents == false)) {
                         _fileWatcher.EnableRaisingEvents = true;
                     }
                 }
