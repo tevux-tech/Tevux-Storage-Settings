@@ -174,9 +174,9 @@ namespace LightConversion.Software.Settings.Tests {
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
-            var hangedCounter = 0;
+            var changedCounter = 0;
             reliableFile.Changed += (sender, args) => {
-                hangedCounter += 1;
+                changedCounter += 1;
             };
 
             reliableFile.TryWriteAllText("Changing file content.");
@@ -184,7 +184,7 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(1000);
 
-            Assert.AreEqual(1, hangedCounter);
+            Assert.AreEqual(1, changedCounter);
         }
 
         [TestMethod]
@@ -233,9 +233,9 @@ namespace LightConversion.Software.Settings.Tests {
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
-            var hangedCounter = 0;
+            var changedCounter = 0;
             reliableFile.Changed += (sender, args) => {
-                hangedCounter += 1;
+                changedCounter += 1;
             };
 
             File.AppendAllText("temp/someFile.txt", "External file edit.");
@@ -243,7 +243,7 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(10);
 
-            Assert.AreEqual(1, hangedCounter);
+            Assert.AreEqual(1, changedCounter);
         }
 
         [TestMethod]
@@ -255,9 +255,9 @@ namespace LightConversion.Software.Settings.Tests {
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
-            var hangedCounter = 0;
+            var changedCounter = 0;
             reliableFile.Changed += (sender, args) => {
-                hangedCounter += 1;
+                changedCounter += 1;
             };
 
             File.Delete("temp/someFile.txt");
@@ -266,7 +266,7 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(10);
 
-            Assert.AreEqual(1, hangedCounter);
+            Assert.AreEqual(1, changedCounter);
         }
 
         [TestMethod]
@@ -277,9 +277,9 @@ namespace LightConversion.Software.Settings.Tests {
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
-            var hangedCounter = 0;
+            var changedCounter = 0;
             reliableFile.Changed += (sender, args) => {
-                hangedCounter += 1;
+                changedCounter += 1;
             };
 
             // Create second temp folder to move to.
@@ -292,7 +292,7 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(10);
 
-            Assert.AreEqual(1, hangedCounter);
+            Assert.AreEqual(1, changedCounter);
 
             // Remove temp folder so no trash is left.
             Directory.Delete("temp2", true);
@@ -305,9 +305,9 @@ namespace LightConversion.Software.Settings.Tests {
             var reliableFile = new ReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
-            var hangedCounter = 0;
+            var changedCounter = 0;
             reliableFile.Changed += (sender, args) => {
-                hangedCounter += 1;
+                changedCounter += 1;
             };
 
             File.Delete("temp/someFile.txt");
@@ -316,7 +316,7 @@ namespace LightConversion.Software.Settings.Tests {
             await Task.Delay(10);
 
             // Delete should not rise any changed event.
-            Assert.AreEqual(0, hangedCounter);
+            Assert.AreEqual(0, changedCounter);
         }
 
         #endregion
