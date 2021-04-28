@@ -335,8 +335,7 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(10);
 
-            // Delete should not rise any changed event.
-            Assert.AreEqual(0, changedCounter);
+            Assert.AreEqual(0, changedCounter, "Delete should not rise any changed events.");
         }
 
         #endregion
