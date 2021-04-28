@@ -222,11 +222,11 @@ namespace LightConversion.Storage.Settings {
             if (e.ChangeType == WatcherChangeTypes.Changed) {
                 var newLastWriteDate = File.GetLastWriteTime(Path);
                 if (_lastWriteDate == newLastWriteDate) isChanged = false;
-                _lastWriteDate = newLastWriteDate;
+                else _lastWriteDate = newLastWriteDate;
             }
 
-            HandleInfoReady($"{e.ChangeType}: {Path}");
             if (isChanged) {
+                HandleInfoReady($"{e.ChangeType}: {Path}");
                 Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
             }
         }
