@@ -33,7 +33,6 @@ namespace LightConversion.Storage.Settings {
         public bool Initialize() {
             if (_isInitialized) return true;
 
-            var isOk = false;
             var mainFileExists = false;
             var rf1FileExists = false;
             var rf2FileExists = false;
@@ -59,7 +58,6 @@ namespace LightConversion.Storage.Settings {
             // Taking action to fix file, if issues present.
             if (state == FileHealth.Intact) {
                 // All good, file structure is intact.
-                isOk = true;
             } else if (state == FileHealth.Recoverable) {
                 // Something is not right, but rf2 is present, so restoring from it.
                 HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\"", "Function Initialize()");
@@ -69,10 +67,9 @@ namespace LightConversion.Storage.Settings {
                         File.Delete(Path);
                         File.Delete(_rf1FilePath);
                         File.Move(_rf2FilePath, Path);
-                        isOk = true;
                     } catch (IOException ex) {
                         HandleNonCriticalError($"File recovery from \"{_rf1FilePath}\" failed because of IOException.", "Function Initialize()", ex);
-                        isOk = false;
+                        throw;
                     }
                 }
             } else if (state == FileHealth.Littered) {
@@ -81,10 +78,9 @@ namespace LightConversion.Storage.Settings {
 
                 try {
                     File.Delete(_rf1FilePath);
-                    isOk = true;
                 } catch (IOException ex) {
                     HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", "Function Initialize()", ex);
-                    isOk = false;
+                    throw;
                 }
             } else if (state == FileHealth.Unrecoverable) {
                 // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
@@ -92,13 +88,9 @@ namespace LightConversion.Storage.Settings {
 
                 try {
                     File.Delete(_rf1FilePath);
-                    isOk = true;
-                } catch (IOException ex) {
-                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", "Function Initialize()", ex);
-                    isOk = false;
                 } catch (Exception ex) {
                     HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.", "Function Initialize()", ex);
-                    isOk = false;
+                    throw;
                 }
             }
 
@@ -115,23 +107,35 @@ namespace LightConversion.Storage.Settings {
                     _fileWatcher.Filter = fileName;
                     _fileWatcher.EnableRaisingEvents = true;
                 } else {
-                    HandleNonCriticalError("Failed to create FileSystemWatcher because can't get directory name from path: " + Path);
+                    var errorMessage = "Failed to create FileSystemWatcher because can't get directory name from path: " + Path;
+                    HandleNonCriticalError(errorMessage);
+                    throw new InvalidOperationException(errorMessage);
                 }
             } catch (Exception ex) {
                 HandleNonCriticalError("Error while initializing file system watcher, error message:" + ex.Message);
+                throw;
             }
 
-            _isInitialized = isOk;
-            return isOk;
+            _isInitialized = true;
+            return true;
         }
 
         public bool Exists() {
-            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
+            if (_isInitialized == false) {
+                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                return false;
+            }
+            
             return File.Exists(Path);
         }
 
         public bool TryReadAllText(out string fileContent) {
-            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
+            if (_isInitialized == false) {
+                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                fileContent = "";
+                return false;
+            }
+            
             var isOk = TryReadAllBytes(out var fileBytes);
 
             if (isOk) fileContent = Encoding.UTF8.GetString(fileBytes);
@@ -141,9 +145,13 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool TryReadAllBytes(out byte[] fileContent) {
-            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
+            if (_isInitialized == false) {
+                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                fileContent = new byte[0];
+                return false;
+            }
+            
             bool returnValue;
-
             fileContent = new byte[0];
             lock (_lock) {
                 if (File.Exists(Path)) {
@@ -164,12 +172,20 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool TryWriteAllText(string textToWrite) {
-            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
+            if (_isInitialized == false) {
+                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                return false;
+            }
+            
             return TryWriteAllBytes(Encoding.UTF8.GetBytes(textToWrite));
         }
 
         public bool TryWriteAllBytes(byte[] bytesToWrite) {
-            if (_isInitialized == false) throw new InvalidOperationException("Object is not initialized. Call Initialize(...) method first.");
+            if (_isInitialized == false) {
+                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                return false;
+            }
+            
             bool returnValue;
 
             lock (_lock) {
