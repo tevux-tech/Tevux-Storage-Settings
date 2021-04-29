@@ -164,7 +164,35 @@ namespace LightConversion.Software.Settings.Tests {
                 }
             }
         }
-        
+
+        [TestMethod]
+        public void TestFailedInitialize() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new ReliableFile("QuestionMark?IsNotAllowedInFileName.txt");
+            Assert.IsFalse(reliableFile.Initialize(), "Initialization must return false when failed.");
+
+            try {
+                reliableFile.TryWriteAllText("This is going to rise exception.");
+                
+                Assert.Fail("TryWriteAllText should throw InvalidOperationException when failed to initialize.");
+            } catch (InvalidOperationException) {
+                // All good, we expect this exception when failed to Initialize.
+            } catch (Exception ex) {
+                Assert.Fail("Writing to file when failed to initialize should throw InvalidOperationException.", ex);
+            }
+
+            try {
+                reliableFile.TryReadAllText(out _);
+
+                Assert.Fail("TryReadAllText should throw InvalidOperationException when failed to initialize.");
+            } catch (InvalidOperationException) {
+                // All good, we expect this exception when failed to Initialize.
+            } catch (Exception ex) {
+                Assert.Fail("Reading from file when failed to initialize should throw InvalidOperationException.", ex);
+            }
+        }
+
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
                 Directory.Delete("temp", true);
