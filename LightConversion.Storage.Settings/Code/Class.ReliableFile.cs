@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 
@@ -96,6 +96,9 @@ namespace LightConversion.Storage.Settings {
                 } catch (IOException ex) {
                     HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", "Function Initialize()", ex);
                     isOk = false;
+                } catch (Exception ex) {
+                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.", "Function Initialize()", ex);
+                    isOk = false;
                 }
             }
 
@@ -118,7 +121,7 @@ namespace LightConversion.Storage.Settings {
                 HandleNonCriticalError("Error while initializing file system watcher, error message:" + ex.Message);
             }
 
-            _isInitialized = true;
+            _isInitialized = isOk;
             return isOk;
         }
 
