@@ -170,26 +170,28 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             var reliableFile = new ReliableFile("QuestionMark?IsNotAllowedInFileName.txt");
-            Assert.IsFalse(reliableFile.Initialize(), "Initialization must return false when failed.");
 
             try {
-                reliableFile.TryWriteAllText("This is going to rise exception.");
-                
-                Assert.Fail("TryWriteAllText should throw InvalidOperationException when failed to initialize.");
-            } catch (InvalidOperationException) {
-                // All good, we expect this exception when failed to Initialize.
-            } catch (Exception ex) {
-                Assert.Fail("Writing to file when failed to initialize should throw InvalidOperationException.", ex);
+                var isInitialized = reliableFile.Initialize();
+                Assert.IsFalse(isInitialized, "Initialization must return false when failed.");
+            } catch (Exception) {
+                // All good.
             }
 
             try {
-                reliableFile.TryReadAllText(out _);
+                var writeResult = reliableFile.TryWriteAllText("This is going to rise exception.");
 
-                Assert.Fail("TryReadAllText should throw InvalidOperationException when failed to initialize.");
-            } catch (InvalidOperationException) {
-                // All good, we expect this exception when failed to Initialize.
+                Assert.IsFalse(writeResult, "Writing to failed to initialize ReliableFile object should return false.");
             } catch (Exception ex) {
-                Assert.Fail("Reading from file when failed to initialize should throw InvalidOperationException.", ex);
+                Assert.Fail("TryWriteAllText should never throw exception.", ex);
+            }
+
+            try {
+                var readResult = reliableFile.TryReadAllText(out _);
+
+                Assert.IsFalse(readResult, "Reading from failed to initialize ReliableFile object should return false.");
+            } catch (Exception ex) {
+                Assert.Fail("TryReadAllText should never throw exception.", ex);
             }
         }
 
