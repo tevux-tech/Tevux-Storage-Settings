@@ -173,12 +173,12 @@ namespace LightConversion.Software.Settings.Tests {
 
             try {
                 reliableFile.Initialize();
-                Assert.Fail("Initialization with invalid name should throw exception.");
+                Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
             } catch (Exception) {
                 // All good.
             }
 
-            var writeResult = reliableFile.TryWriteAllText("This is going to rise exception.");
+            var writeResult = reliableFile.TryWriteAllText("Some text.");
             Assert.IsFalse(writeResult, "Writing to failed to initialize ReliableFile object should return false.");
 
             var readResult = reliableFile.TryReadAllText(out _);
