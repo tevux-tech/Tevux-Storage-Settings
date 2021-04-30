@@ -16,7 +16,7 @@ namespace LightConversion.Storage.Settings {
                 try {
                     _dataCache = JsonSerializer.Deserialize<Dictionary<string, object>>(fileBytes);
                 } catch (JsonParsingException) {
-                    HandleNonCriticalError($"Deserializing \"{dataFile.Path}\" failed. File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file.");
+                    HandleNonCriticalError($"Deserializing \"{dataFile.Path}\" failed. File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file.", $"Function {nameof(Initialize)}()");
 
                     var backupFilePath = DataFile.Path + ".backup";
                     File.Copy(DataFile.Path, backupFilePath, true);
@@ -25,7 +25,7 @@ namespace LightConversion.Storage.Settings {
                     _dataCache = new Dictionary<string, object>();
                 }
             } else {
-                HandleNonCriticalError($"Reading from \"{DataFile.Path}\" failed. No settings will be loaded.");
+                HandleNonCriticalError($"Reading from \"{DataFile.Path}\" failed. No settings will be loaded.", $"Function {nameof(Initialize)}()");
                 _dataCache = new Dictionary<string, object>();
             }
 

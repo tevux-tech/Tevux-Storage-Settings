@@ -8,7 +8,7 @@
             }
 
             if (isOk == false) {
-                HandleNonCriticalError($"Can't get setting with key \"{key}\" because it doesn't exist.", "Function TryGetInternal()");
+                HandleNonCriticalError($"Can't get setting with key \"{key}\" because it doesn't exist.", $"Function {nameof(TryGetInternal)}()");
             }
 
             return isOk;

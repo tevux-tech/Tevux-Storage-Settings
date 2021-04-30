@@ -60,7 +60,7 @@ namespace LightConversion.Storage.Settings {
                 // All good, file structure is intact.
             } else if (state == FileHealth.Recoverable) {
                 // Something is not right, but rf2 is present, so restoring from it.
-                HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\"", "Function Initialize()");
+                HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\"", $"Function {nameof(Initialize)}()");
 
                 lock (_lock) {
                     try {
@@ -68,17 +68,17 @@ namespace LightConversion.Storage.Settings {
                         File.Delete(_rf1FilePath);
                         File.Move(_rf2FilePath, Path);
                     } catch (IOException ex) {
-                        HandleNonCriticalError($"File recovery from \"{_rf1FilePath}\" failed because of IOException.", "Function Initialize()", ex);
+                        HandleNonCriticalError($"File recovery from \"{_rf1FilePath}\" failed because of IOException.", $"Function {nameof(Initialize)}()", ex);
                     }
                 }
             } else if (state == FileHealth.Littered) {
                 // Last write is probably lost, but main file is still there. Just cleaning up.
-                HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.", "Function Initialize()");
+                HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.", $"Function {nameof(Initialize)}()");
 
                 try {
                     File.Delete(_rf1FilePath);
                 } catch (IOException ex) {
-                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", "Function Initialize()", ex);
+                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", $"Function {nameof(Initialize)}()", ex);
                 }
             } else if (state == FileHealth.Unrecoverable) {
                 // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
@@ -87,7 +87,7 @@ namespace LightConversion.Storage.Settings {
                 try {
                     File.Delete(_rf1FilePath);
                 } catch (Exception ex) {
-                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.", "Function Initialize()", ex);
+                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.", $"Function {nameof(Initialize)}()", ex);
                 }
             }
 
@@ -116,7 +116,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool Exists() {
             if (_isInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(Exists)}()");
                 return false;
             }
             
@@ -125,7 +125,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool TryReadAllText(out string fileContent) {
             if (_isInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryReadAllText)}()");
                 fileContent = "";
                 return false;
             }
@@ -140,7 +140,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool TryReadAllBytes(out byte[] fileContent) {
             if (_isInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryReadAllBytes)}()");
                 fileContent = new byte[0];
                 return false;
             }
@@ -153,11 +153,11 @@ namespace LightConversion.Storage.Settings {
                         fileContent = File.ReadAllBytes(Path);
                         returnValue = true;
                     } catch (IOException ex) {
-                        HandleNonCriticalError("Reading file failed because of IOException.", "Function TryReadAllBytes()", ex);
+                        HandleNonCriticalError("Reading file failed because of IOException.", $"Function {nameof(TryReadAllBytes)}()", ex);
                         returnValue = false;
                     }
                 } else {
-                    HandleNonCriticalError("Reading file failed because it doesn't exist.", "Function TryReadAllBytes()");
+                    HandleNonCriticalError("Reading file failed because it doesn't exist.", $"Function {nameof(TryReadAllBytes)}()");
                     returnValue = false;
                 }
             }
@@ -167,7 +167,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool TryWriteAllText(string textToWrite) {
             if (_isInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryWriteAllText)}()");
                 return false;
             }
             
@@ -176,7 +176,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool TryWriteAllBytes(byte[] bytesToWrite) {
             if (_isInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.");
+                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryWriteAllBytes)}()");
                 return false;
             }
             
@@ -196,7 +196,7 @@ namespace LightConversion.Storage.Settings {
                     File.Move(_rf2FilePath, Path);
                     returnValue = true;
                 } catch (IOException ex) {
-                    HandleNonCriticalError("Writing to file failed because of IOException.", "Function TryWriteAllBytes()", ex);
+                    HandleNonCriticalError("Writing to file failed because of IOException.", $"Function {nameof(TryWriteAllBytes)}()", ex);
                     returnValue = false;
                 } finally {
                     // Make sure to reenable watcher before leaving method.
@@ -254,7 +254,7 @@ namespace LightConversion.Storage.Settings {
         }
 
         private void OnError(object sender, ErrorEventArgs e) {
-            HandleNonCriticalError("Error happened in FileSystemWatcher, message:" + e.GetException().Message);
+            HandleNonCriticalError("Error happened in FileSystemWatcher, message:" + e.GetException().Message, $"Function {nameof(OnError)}()");
         }
     }
 }
