@@ -30,11 +30,34 @@ namespace LightConversion.Storage.Settings {
             _rf2FilePath = filePath + ".rf2";
         }
 
+        /// <summary>
+        /// Initialize ReliableFile object. Try to recover file if last write operation failed. Start listening for file changes.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
         public void Initialize() {
             if (_isInitialized) return;
 
+            string fileDirectory;
+            string fileName;
+            try {
+                fileName = System.IO.Path.GetFileName(Path);
+            } catch (Exception ex) {
+                throw new InvalidOperationException("Failed to parse file name.", ex);
+            }
+
+            try {
+                fileDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path));
+            } catch (Exception ex) {
+                throw new InvalidOperationException("Failed to parse directory path.", ex);
+            }
+
+            if (string.IsNullOrEmpty(fileDirectory)) {
+                throw new InvalidOperationException("Failed to resolve directory for file:" + Path);
+            }
+
             var mainFileExists = false;
             var rf1FileExists = false;
+
             var rf2FileExists = false;
 
             // Checking what is on the disk.
@@ -61,7 +84,6 @@ namespace LightConversion.Storage.Settings {
             } else if (state == FileHealth.Recoverable) {
                 // Something is not right, but rf2 is present, so restoring from it.
                 HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\"", $"Function {nameof(Initialize)}()");
-
                 lock (_lock) {
                     try {
                         File.Delete(Path);
@@ -74,7 +96,6 @@ namespace LightConversion.Storage.Settings {
             } else if (state == FileHealth.Littered) {
                 // Last write is probably lost, but main file is still there. Just cleaning up.
                 HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.", $"Function {nameof(Initialize)}()");
-
                 try {
                     File.Delete(_rf1FilePath);
                 } catch (IOException ex) {
@@ -93,25 +114,19 @@ namespace LightConversion.Storage.Settings {
 
             // Initialize file system watcher.
             try {
-                var fileDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path));
-                if (string.IsNullOrEmpty(fileDirectory) == false) {
-                    var fileName = System.IO.Path.GetFileName(Path);
-                    _fileWatcher = new FileSystemWatcher(fileDirectory);
-                    _fileWatcher.Changed += HandleFileChangedEvent;
-                    _fileWatcher.Created += HandleFileCreatedEvent;
-                    _fileWatcher.Renamed += HandleFileCreatedEvent;
-                    _fileWatcher.Error += OnError;
-                    _fileWatcher.Filter = fileName;
-                    _fileWatcher.EnableRaisingEvents = true;
-                } else {
-                    throw new InvalidOperationException("Failed to create FileSystemWatcher because can't get directory name from path: " + Path);
-                }
+                _fileWatcher = new FileSystemWatcher(fileDirectory);
             } catch (Exception ex) {
-                throw new InvalidOperationException("Error while initializing file system watcher, error message:" + ex.Message);
+                throw new InvalidOperationException("Failed to create FileSystemWatcher.", ex);
             }
 
+            _fileWatcher.Changed += HandleFileChangedEvent;
+            _fileWatcher.Created += HandleFileCreatedEvent;
+            _fileWatcher.Renamed += HandleFileCreatedEvent;
+            _fileWatcher.Error += OnError;
+            _fileWatcher.Filter = fileName;
+            _fileWatcher.EnableRaisingEvents = true;
             _isInitialized = true;
-            return;
+
         }
 
         public bool Exists() {
@@ -119,7 +134,7 @@ namespace LightConversion.Storage.Settings {
                 HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(Exists)}()");
                 return false;
             }
-            
+
             return File.Exists(Path);
         }
 
@@ -129,7 +144,7 @@ namespace LightConversion.Storage.Settings {
                 fileContent = "";
                 return false;
             }
-            
+
             var isOk = TryReadAllBytes(out var fileBytes);
 
             if (isOk) fileContent = Encoding.UTF8.GetString(fileBytes);
@@ -144,7 +159,7 @@ namespace LightConversion.Storage.Settings {
                 fileContent = new byte[0];
                 return false;
             }
-            
+
             bool returnValue;
             fileContent = new byte[0];
             lock (_lock) {
@@ -170,7 +185,7 @@ namespace LightConversion.Storage.Settings {
                 HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryWriteAllText)}()");
                 return false;
             }
-            
+
             return TryWriteAllBytes(Encoding.UTF8.GetBytes(textToWrite));
         }
 
@@ -179,7 +194,7 @@ namespace LightConversion.Storage.Settings {
                 HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryWriteAllBytes)}()");
                 return false;
             }
-            
+
             bool returnValue;
 
             lock (_lock) {
