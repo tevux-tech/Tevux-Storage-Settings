@@ -30,8 +30,8 @@ namespace LightConversion.Storage.Settings {
             _rf2FilePath = filePath + ".rf2";
         }
 
-        public bool Initialize() {
-            if (_isInitialized) return true;
+        public void Initialize() {
+            if (_isInitialized) return;
 
             var mainFileExists = false;
             var rf1FileExists = false;
@@ -69,7 +69,6 @@ namespace LightConversion.Storage.Settings {
                         File.Move(_rf2FilePath, Path);
                     } catch (IOException ex) {
                         HandleNonCriticalError($"File recovery from \"{_rf1FilePath}\" failed because of IOException.", "Function Initialize()", ex);
-                        throw;
                     }
                 }
             } else if (state == FileHealth.Littered) {
@@ -80,7 +79,6 @@ namespace LightConversion.Storage.Settings {
                     File.Delete(_rf1FilePath);
                 } catch (IOException ex) {
                     HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", "Function Initialize()", ex);
-                    throw;
                 }
             } else if (state == FileHealth.Unrecoverable) {
                 // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
@@ -90,7 +88,6 @@ namespace LightConversion.Storage.Settings {
                     File.Delete(_rf1FilePath);
                 } catch (Exception ex) {
                     HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.", "Function Initialize()", ex);
-                    throw;
                 }
             }
 
@@ -107,17 +104,14 @@ namespace LightConversion.Storage.Settings {
                     _fileWatcher.Filter = fileName;
                     _fileWatcher.EnableRaisingEvents = true;
                 } else {
-                    var errorMessage = "Failed to create FileSystemWatcher because can't get directory name from path: " + Path;
-                    HandleNonCriticalError(errorMessage);
-                    throw new InvalidOperationException(errorMessage);
+                    throw new InvalidOperationException("Failed to create FileSystemWatcher because can't get directory name from path: " + Path);
                 }
             } catch (Exception ex) {
-                HandleNonCriticalError("Error while initializing file system watcher, error message:" + ex.Message);
-                throw;
+                throw new InvalidOperationException("Error while initializing file system watcher, error message:" + ex.Message);
             }
 
             _isInitialized = true;
-            return true;
+            return;
         }
 
         public bool Exists() {

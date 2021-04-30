@@ -172,8 +172,8 @@ namespace LightConversion.Software.Settings.Tests {
             var reliableFile = new ReliableFile("QuestionMark?IsNotAllowedInFileName.txt");
 
             try {
-                var isInitialized = reliableFile.Initialize();
-                Assert.IsFalse(isInitialized, "Initialization must return false when failed.");
+                reliableFile.Initialize();
+                Assert.Fail("Initialization with invalid name should throw exception.");
             } catch (Exception) {
                 // All good.
             }
