@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -162,6 +163,26 @@ namespace LightConversion.Software.Settings.Tests {
                     Assert.Fail("No exception should be thrown", ex);
                 }
             }
+        }
+
+        [TestMethod]
+        public void TestFailedInitialize() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new ReliableFile("QuestionMark?IsNotAllowedInFileName.txt");
+
+            try {
+                reliableFile.Initialize();
+                Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
+            } catch (Exception) {
+                // All good.
+            }
+
+            var writeResult = reliableFile.TryWriteAllText("Some text.");
+            Assert.IsFalse(writeResult, "Writing to failed to initialize ReliableFile object should return false.");
+
+            var readResult = reliableFile.TryReadAllText(out _);
+            Assert.IsFalse(readResult, "Reading from failed to initialize ReliableFile object should return false.");
         }
 
         private void CreateCleanTempFolder() {

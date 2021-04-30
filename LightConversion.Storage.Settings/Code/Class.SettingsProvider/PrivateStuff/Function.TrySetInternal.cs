@@ -11,7 +11,7 @@ namespace LightConversion.Storage.Settings {
             }
 
             if (isOk == false) {
-                HandleNonCriticalError($"Setting setting \"{key}\" to {value} failed because writing to file failed.", "Function TrySetInternal()");
+                HandleNonCriticalError($"Setting setting \"{key}\" to {value} failed because writing to file failed.", $"Function {nameof(TrySetInternal)}()");
             }
 
             return isOk;
