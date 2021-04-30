@@ -178,21 +178,11 @@ namespace LightConversion.Software.Settings.Tests {
                 // All good.
             }
 
-            try {
-                var writeResult = reliableFile.TryWriteAllText("This is going to rise exception.");
+            var writeResult = reliableFile.TryWriteAllText("This is going to rise exception.");
+            Assert.IsFalse(writeResult, "Writing to failed to initialize ReliableFile object should return false.");
 
-                Assert.IsFalse(writeResult, "Writing to failed to initialize ReliableFile object should return false.");
-            } catch (Exception ex) {
-                Assert.Fail("TryWriteAllText should never throw exception.", ex);
-            }
-
-            try {
-                var readResult = reliableFile.TryReadAllText(out _);
-
-                Assert.IsFalse(readResult, "Reading from failed to initialize ReliableFile object should return false.");
-            } catch (Exception ex) {
-                Assert.Fail("TryReadAllText should never throw exception.", ex);
-            }
+            var readResult = reliableFile.TryReadAllText(out _);
+            Assert.IsFalse(readResult, "Reading from failed to initialize ReliableFile object should return false.");
         }
 
         private void CreateCleanTempFolder() {
