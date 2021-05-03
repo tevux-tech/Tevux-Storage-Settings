@@ -20,7 +20,7 @@
             }
 
             if (isOk == false) {
-                HandleNonCriticalError(errorMessage, "Function TryRemove()");
+                HandleNonCriticalError(errorMessage, $"Function {nameof(TryRemove)}()");
             }
 
             return isOk;

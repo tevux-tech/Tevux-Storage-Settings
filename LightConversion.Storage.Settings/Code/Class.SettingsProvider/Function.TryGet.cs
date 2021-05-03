@@ -9,7 +9,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match integer.", "Function TryGet(out int)");
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match integer.", $"Function {nameof(TryGet)}(out int)");
                     isOk = false;
                 }
             }
@@ -24,7 +24,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match double.", "Function TryGet(out double)");
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match double.", $"Function {nameof(TryGet)}(out double)");
                     isOk = false;
                 }
             }
@@ -39,7 +39,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match boolean.", "Function TryGet(out bool)");
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match boolean.", $"Function {nameof(TryGet)}(out bool)");
                     isOk = false;
                 }
             }
@@ -54,7 +54,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match string.", "Function TryGet(out string)");
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match string.", $"Function {nameof(TryGet)}(out string)");
                     isOk = false;
                 }
             }
@@ -69,7 +69,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match DateTime.", "Function TryGet(out DateTime)");
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match DateTime.", $"Function {nameof(TryGet)}(out DateTime)");
                     isOk = false;
                 }
             }
