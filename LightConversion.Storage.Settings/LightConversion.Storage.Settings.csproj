@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.4.0</Version>
+    <Version>0.5.0</Version>
     <AssemblyVersion>0.4.0.0</AssemblyVersion>
     <Copyright>Copyright © 2021 Light Conversion, UAB</Copyright>
     <Description>Library for reliably storing and loading application settings/data to json file.</Description>
