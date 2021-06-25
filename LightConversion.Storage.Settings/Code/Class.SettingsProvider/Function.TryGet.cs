@@ -31,6 +31,21 @@ namespace LightConversion.Storage.Settings {
 
             return isOk;
         }
+        
+        public bool TryGet(string key, out float value) {
+            bool isOk;
+            value = 0;
+
+            isOk = TryGetInternal(key, out var valueOfUnknownType);
+            if (isOk) {
+                if (TryConvert(valueOfUnknownType, out value) == false) {
+                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match float.", $"Function {nameof(TryGet)}(out float)");
+                    isOk = false;
+                }
+            }
+
+            return isOk;
+        }
 
         public bool TryGet(string key, out bool value) {
             bool isOk;

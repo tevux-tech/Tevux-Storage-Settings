@@ -251,6 +251,29 @@ namespace LightConversion.Software.Settings.Tests {
             Assert.IsTrue(settings2.Contains("SomeIntegerKey2"));
         }
 
+        [TestMethod]
+        public void TestFloatSetting() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new ReliableFile("temp/someSettings.json");
+            reliableFile.Initialize();
+
+            var settings = new SettingsProvider();
+            settings.Initialize(reliableFile);
+            var someSetting = 10.0f / 9;
+            settings.TrySet("SomeFloatNumber", someSetting);
+
+            var isOk = settings.TryGet("SomeFloatNumber", out float loadedFloatSetting);
+            Assert.IsTrue(isOk);
+            Assert.AreEqual(loadedFloatSetting, someSetting);
+
+            double someDoubleSetting = 10.0 / 9;
+            settings.TrySet("SomeDoubleNumber", someDoubleSetting);
+            isOk = settings.TryGet("SomeDoubleNumber", out float loadedSetting);
+            Assert.IsTrue(isOk);
+            Assert.AreEqual((float)someDoubleSetting, loadedSetting);
+        }
+
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
                 Directory.Delete("temp", true);
