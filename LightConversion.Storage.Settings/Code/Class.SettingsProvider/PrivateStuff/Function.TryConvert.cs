@@ -12,6 +12,8 @@ namespace LightConversion.Storage.Settings {
                 convertedValue = (int)valueAsLong;
             } else if (valueToConvert is double valueAsDouble) {
                 convertedValue = Convert.ToInt32(valueAsDouble);
+            } else if (valueToConvert is float valueAsFloat) {
+                convertedValue = Convert.ToInt32(valueAsFloat);
             } else {
                 convertedValue = 0;
                 isOk = false;
@@ -25,6 +27,27 @@ namespace LightConversion.Storage.Settings {
 
             if (valueToConvert is double valueAsDouble) {
                 convertedValue = valueAsDouble;
+            } else if (valueToConvert is float valueAsFloat) {
+                convertedValue = valueAsFloat;
+            } else if (valueToConvert is int valueAsInt) {
+                convertedValue = valueAsInt;
+            } else if (valueToConvert is long valueAsLong) {
+                convertedValue = valueAsLong;
+            } else {
+                convertedValue = 0;
+                isOk = false;
+            }
+
+            return isOk;
+        }
+
+        private bool TryConvert(object valueToConvert, out float convertedValue) {
+            var isOk = true;
+
+            if (valueToConvert is float valueAsFloat) {
+                convertedValue = valueAsFloat;
+            } else if (valueToConvert is double valueAsDouble) {
+                convertedValue = (float)valueAsDouble;
             } else if (valueToConvert is int valueAsInt) {
                 convertedValue = valueAsInt;
             } else if (valueToConvert is long valueAsLong) {

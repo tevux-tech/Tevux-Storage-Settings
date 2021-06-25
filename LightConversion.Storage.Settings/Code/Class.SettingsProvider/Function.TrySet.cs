@@ -9,6 +9,10 @@ namespace LightConversion.Storage.Settings {
         public bool TrySet(string key, double value) {
             return TrySetInternal<double>(key, value);
         }
+        
+        public bool TrySet(string key, float value) {
+            return TrySetInternal<float>(key, value);
+        }
 
         public bool TrySet(string key, string value) {
             return TrySetInternal<string>(key, value);
