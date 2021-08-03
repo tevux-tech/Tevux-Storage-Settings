@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NLog;
 
 namespace LightConversion.Software.Settings.Tests {
     [TestClass]
@@ -14,7 +14,7 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someFile.txt", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
-            reliableFile.Initialize();
+            reliableFile.Initialize(LogManager.CreateNullLogger());
 
             var isOk = reliableFile.TryReadAllText(out var fileContent);
             Assert.IsTrue(isOk);
@@ -26,7 +26,7 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
-            reliableFile.Initialize();
+            reliableFile.Initialize(LogManager.CreateNullLogger());
 
             var isOk = reliableFile.TryWriteAllText("some text");
             Assert.IsTrue(isOk);
@@ -41,7 +41,7 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             var rf = new ReliableFile("temp/someFile.txt");
-            rf.Initialize();
+            rf.Initialize(LogManager.CreateNullLogger());
 
             var isOk = rf.TryReadAllText(out var fileContent);
             Assert.IsFalse(isOk, "File doesn't exist, must return false");
@@ -56,7 +56,7 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someFile.txt.rf1", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
-            reliableFile.Initialize();
+            reliableFile.Initialize(LogManager.CreateNullLogger());
 
             var isOk = reliableFile.TryReadAllText(out var fileContent);
             Assert.IsFalse(isOk, "No recovery must be done from .rf1, must return false");
@@ -71,7 +71,7 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someFile.txt.rf1", "new text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
-            reliableFile.Initialize();
+            reliableFile.Initialize(LogManager.CreateNullLogger());
 
             var isOk = reliableFile.TryReadAllText(out var fileContent);
             Assert.IsTrue(isOk, "Original file must be read");
@@ -90,7 +90,7 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someFile.txt.rf2", "new text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
-            reliableFile.Initialize();
+            reliableFile.Initialize(LogManager.CreateNullLogger());
 
             var isOk = reliableFile.TryReadAllText(out var fileContent);
             Assert.IsTrue(isOk, "Backup from rf2 must be made");
@@ -109,7 +109,7 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someFile.txt.rf2", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
-            reliableFile.Initialize();
+            reliableFile.Initialize(LogManager.CreateNullLogger());
 
             var isOk = reliableFile.TryReadAllText(out var fileContent);
             Assert.IsTrue(isOk);
@@ -124,7 +124,7 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someFile.txt.rf1", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
-            reliableFile.Initialize();
+            reliableFile.Initialize(LogManager.CreateNullLogger());
 
             var isRf1StillPresent = File.Exists("temp/someFile.rf1");
             Assert.IsFalse(isRf1StillPresent);
@@ -138,7 +138,7 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someFile.txt.rf2", "some text");
 
             var reliableFile = new ReliableFile("temp/someFile.txt");
-            reliableFile.Initialize();
+            reliableFile.Initialize(LogManager.CreateNullLogger());
 
             var isRf2StillPresent = File.Exists("temp/someFile.txt.rf2");
             Assert.IsFalse(isRf2StillPresent);
@@ -151,7 +151,7 @@ namespace LightConversion.Software.Settings.Tests {
             // Simulating opened file by other program.
             using (var openFileStream = File.Open("temp/someFile.txt", FileMode.OpenOrCreate)) {
                 var reliableFile = new ReliableFile("temp/someFile.txt");
-                reliableFile.Initialize();
+                reliableFile.Initialize(LogManager.CreateNullLogger());
 
                 try {
                     var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -163,26 +163,6 @@ namespace LightConversion.Software.Settings.Tests {
                     Assert.Fail("No exception should be thrown", ex);
                 }
             }
-        }
-
-        [TestMethod]
-        public void TestFailedInitialize() {
-            CreateCleanTempFolder();
-
-            var reliableFile = new ReliableFile("QuestionMark?IsNotAllowedInFileName.txt");
-
-            try {
-                reliableFile.Initialize();
-                Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
-            } catch (Exception) {
-                // All good.
-            }
-
-            var writeResult = reliableFile.TryWriteAllText("Some text.");
-            Assert.IsFalse(writeResult, "Writing to failed to initialize ReliableFile object should return false.");
-
-            var readResult = reliableFile.TryReadAllText(out _);
-            Assert.IsFalse(readResult, "Reading from failed to initialize ReliableFile object should return false.");
         }
 
         private void CreateCleanTempFolder() {

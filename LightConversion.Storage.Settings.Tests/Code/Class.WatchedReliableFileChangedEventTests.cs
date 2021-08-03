@@ -1,16 +1,33 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NLog;
 
 namespace LightConversion.Software.Settings.Tests {
     [TestClass]
-    public class ReliableFileChangedEventTests {
+    public class WatchedReliableFileChangedEventTests {
+        [TestMethod]
+        public void TestFailedInitialize() {
+            CreateCleanTempFolder();
+
+            var reliableFile = new WatchedReliableFile("QuestionMark?IsNotAllowedInFileName.txt");
+
+            try {
+                reliableFile.Initialize(LogManager.CreateNullLogger());
+                Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
+            }
+            catch (Exception) {
+                // All good.
+            }
+        }
+
         [TestMethod]
         public async Task TestInternalWrite() {
             CreateCleanTempFolder();
 
-            var reliableFile = new ReliableFile("temp/someFile.txt");
+            var reliableFile = new WatchedReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
             var changedCounter = 0;
@@ -30,7 +47,7 @@ namespace LightConversion.Software.Settings.Tests {
         public async Task TestInitializeWithoutFolder() {
             CreateCleanTempFolder();
 
-            var reliableFile = new ReliableFile("someFile.txt");
+            var reliableFile = new WatchedReliableFile("someFile.txt");
             reliableFile.Initialize();
 
             var changedCounter = 0;
@@ -50,7 +67,7 @@ namespace LightConversion.Software.Settings.Tests {
         public async Task TestLastFileContent() {
             CreateCleanTempFolder();
 
-            var reliableFile = new ReliableFile("temp/someFile.txt");
+            var reliableFile = new WatchedReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
             var lastFileContent = "";
@@ -89,7 +106,7 @@ namespace LightConversion.Software.Settings.Tests {
         public async Task TestExternalWrite() {
             CreateCleanTempFolder();
 
-            var reliableFile = new ReliableFile("temp/someFile.txt");
+            var reliableFile = new WatchedReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
             var changedCounter = 0;
@@ -111,7 +128,7 @@ namespace LightConversion.Software.Settings.Tests {
 
             File.WriteAllText("temp/someFile.txt", "Creating file.");
 
-            var reliableFile = new ReliableFile("temp/someFile.txt");
+            var reliableFile = new WatchedReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
             var changedCounter = 0;
@@ -133,7 +150,7 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             File.WriteAllText("temp/someFile.txt", "Creating file.");
-            var reliableFile = new ReliableFile("temp/someFile.txt");
+            var reliableFile = new WatchedReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
             var changedCounter = 0;
@@ -161,7 +178,7 @@ namespace LightConversion.Software.Settings.Tests {
         public async Task TestExternalDelete() {
             CreateCleanTempFolder();
 
-            var reliableFile = new ReliableFile("temp/someFile.txt");
+            var reliableFile = new WatchedReliableFile("temp/someFile.txt");
             reliableFile.Initialize();
 
             var changedCounter = 0;

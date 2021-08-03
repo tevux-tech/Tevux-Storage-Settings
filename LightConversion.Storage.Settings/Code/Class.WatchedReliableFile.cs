@@ -5,7 +5,7 @@ using NLog;
 namespace LightConversion.Storage.Settings {
     public class WatchedReliableFile : ReliableFile {
         public bool IsInitialized { get; private set; }
-        
+
         private FileSystemWatcher _fileWatcher;
         private DateTime _lastWriteDate;
         public event GeneralEventHandler Changed;
@@ -19,14 +19,22 @@ namespace LightConversion.Storage.Settings {
         /// Initialize ReliableFile and start listening for file changes.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
+        public new void Initialize() {
+            Initialize(LogManager.CreateNullLogger());
+        }
+
+        /// <summary>
+        /// Initialize ReliableFile and start listening for file changes.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
         public new void Initialize(Logger logger) {
             if (IsInitialized) return;
 
             if (logger == null) {
-                throw new InvalidOperationException($"Argument {nameof(logger)} can't be null.");
+                throw new InvalidOperationException($"Argument {nameof(logger)} can't be null. Use {nameof(LogManager.CreateNullLogger)} instead.");
             }
 
-            base.Initialize(_logger);
+            base.Initialize(logger);
             if (base.IsInitialized == false) {
                 // TODO: log here.
                 return;
@@ -66,8 +74,8 @@ namespace LightConversion.Storage.Settings {
             _fileWatcher.EnableRaisingEvents = true;
             IsInitialized = true;
         }
-        
-        
+
+
         public new bool TryWriteAllBytes(byte[] bytesToWrite) {
             if (IsInitialized == false) {
                 // TODO: log.error ("Object is not initialized or failed to initialize.", $"Function {nameof(TryWriteAllBytes)}()");

@@ -27,23 +27,30 @@ namespace LightConversion.Storage.Settings {
         private readonly string _rf2FilePath;
         private readonly object _lock = new object();
         private Logger _logger;
-        
+
         /// <summary>
         /// Initialize ReliableFile object. Try to recover file if last write operation failed. Start listening for file changes.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
+        public void Initialize() {
+            Initialize(LogManager.CreateNullLogger());
+        }
+
+        /// <summary>
+        /// Initialize ReliableFile object. Try to recover file if last write operation failed.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
         public void Initialize(Logger logger) {
             if (IsInitialized) return;
-            
+
             if (logger == null) {
                 throw new InvalidOperationException($"Argument {nameof(logger)} can't be null.");
             }
 
             _logger = logger;
-            
+
             var mainFileExists = false;
             var rf1FileExists = false;
-
             var rf2FileExists = false;
 
             // Checking what is on the disk.
