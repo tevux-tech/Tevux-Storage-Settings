@@ -4,12 +4,9 @@ using System.Text;
 using NLog;
 
 namespace LightConversion.Storage.Settings {
-    public class ReliableFile : ISilentReporter {
-        public bool IsInitialized { get; private set; }
+    public class ReliableFile {
+        private bool _isInitialized;
         public string Path { get; }
-        public bool AreExceptionsSilent { get; set; }
-        public event GeneralEventHandler ErrorOccurred;
-        public event GeneralEventHandler InfoReady;
         public ReliableFile(string filePath) {
             // Building all the file paths we'll be using in this class.
             Path = filePath;
@@ -41,7 +38,7 @@ namespace LightConversion.Storage.Settings {
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
         public void Initialize(Logger logger) {
-            if (IsInitialized) return;
+            if (_isInitialized) return;
 
             if (logger == null) {
                 throw new InvalidOperationException($"Argument {nameof(logger)} can't be null.");
@@ -77,7 +74,7 @@ namespace LightConversion.Storage.Settings {
             }
             else if (state == FileHealth.Recoverable) {
                 // Something is not right, but rf2 is present, so restoring from it.
-                HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\"", $"Function {nameof(Initialize)}()");
+                _logger.Warn($"Recovering from \"{_rf2FilePath}\".");
                 lock (_lock) {
                     try {
                         File.Delete(Path);
@@ -85,38 +82,38 @@ namespace LightConversion.Storage.Settings {
                         File.Move(_rf2FilePath, Path);
                     }
                     catch (IOException ex) {
-                        HandleNonCriticalError($"File recovery from \"{_rf1FilePath}\" failed because of IOException.", $"Function {nameof(Initialize)}()", ex);
+                        _logger.Error(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
                     }
                 }
             }
             else if (state == FileHealth.Littered) {
                 // Last write is probably lost, but main file is still there. Just cleaning up.
-                HandleInfoReady($"Warning. Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.", $"Function {nameof(Initialize)}()");
+                _logger.Warn($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
                 try {
                     File.Delete(_rf1FilePath);
                 }
                 catch (IOException ex) {
-                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.", $"Function {nameof(Initialize)}()", ex);
+                    _logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
                 }
             }
             else if (state == FileHealth.Unrecoverable) {
                 // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
-                HandleNonCriticalError("File is unrecoverable. Probably last saving crashed at some point.", "Function Initialize()");
+                _logger.Error("File is unrecoverable. Probably last saving crashed at some point.");
 
                 try {
                     File.Delete(_rf1FilePath);
                 }
                 catch (Exception ex) {
-                    HandleNonCriticalError($"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.", $"Function {nameof(Initialize)}()", ex);
+                    _logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
                 }
             }
 
-            IsInitialized = true;
+            _isInitialized = true;
         }
 
         public bool Exists() {
-            if (IsInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(Exists)}()");
+            if (_isInitialized == false) {
+                _logger.Error("Object is not initialized or failed to initialize.");
                 return false;
             }
 
@@ -124,8 +121,8 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool TryReadAllText(out string fileContent) {
-            if (IsInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryReadAllText)}()");
+            if (_isInitialized == false) {
+                _logger.Error("Object is not initialized or failed to initialize.");
                 fileContent = "";
                 return false;
             }
@@ -139,8 +136,8 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool TryReadAllBytes(out byte[] fileContent) {
-            if (IsInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryReadAllBytes)}()");
+            if (_isInitialized == false) {
+                _logger.Error("Object is not initialized or failed to initialize.");
                 fileContent = new byte[0];
                 return false;
             }
@@ -154,12 +151,12 @@ namespace LightConversion.Storage.Settings {
                         returnValue = true;
                     }
                     catch (IOException ex) {
-                        HandleNonCriticalError("Reading file failed because of IOException.", $"Function {nameof(TryReadAllBytes)}()", ex);
+                        _logger.Error(ex, "Reading file failed because of IOException.");
                         returnValue = false;
                     }
                 }
                 else {
-                    HandleNonCriticalError("Reading file failed because it doesn't exist.", $"Function {nameof(TryReadAllBytes)}()");
+                    _logger.Error("Reading file failed because it doesn't exist.");
                     returnValue = false;
                 }
             }
@@ -168,8 +165,8 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool TryWriteAllText(string textToWrite) {
-            if (IsInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryWriteAllText)}()");
+            if (_isInitialized == false) {
+                _logger.Error("Object is not initialized or failed to initialize.");
                 return false;
             }
 
@@ -177,8 +174,8 @@ namespace LightConversion.Storage.Settings {
         }
 
         public bool TryWriteAllBytes(byte[] bytesToWrite) {
-            if (IsInitialized == false) {
-                HandleNonCriticalError("Object is not initialized or failed to initialize.", $"Function {nameof(TryWriteAllBytes)}()");
+            if (_isInitialized == false) {
+                _logger.Error("Object is not initialized or failed to initialize.");
                 return false;
             }
 
@@ -193,30 +190,12 @@ namespace LightConversion.Storage.Settings {
                     returnValue = true;
                 }
                 catch (IOException ex) {
-                    HandleNonCriticalError("Writing to file failed because of IOException.", $"Function {nameof(TryWriteAllBytes)}()", ex);
+                    _logger.Error(ex, "Writing to file failed because of IOException.");
                     returnValue = false;
                 }
             }
 
             return returnValue;
-        }
-
-        private void HandleInfoReady(string message, string source = "", object additionalInfo = null) {
-            InfoReady?.Invoke(this, new GeneralEventArgs(message, source, additionalInfo));
-        }
-
-        private void HandleNonCriticalError(string message, string source = "", Exception innerException = null) {
-            var fullMessage = message;
-            if (innerException != null) {
-                fullMessage += "\r\n\r\n Original exception:\r\n";
-                var tempException = innerException;
-                while (tempException != null) {
-                    fullMessage += tempException.Message;
-                    tempException = tempException.InnerException;
-                }
-            }
-
-            ErrorOccurred?.Invoke(this, new GeneralEventArgs(fullMessage, source, innerException));
         }
     }
 }

@@ -4,15 +4,14 @@ using NLog;
 
 namespace LightConversion.Storage.Settings {
     public class WatchedReliableFile : ReliableFile {
-        public bool IsInitialized { get; private set; }
-
+        private bool _isInitialized;
         private FileSystemWatcher _fileWatcher;
         private DateTime _lastWriteDate;
         public event GeneralEventHandler Changed;
         private Logger _logger;
 
         public WatchedReliableFile(string filePath) : base(filePath) {
-
+            // Nothing to do right now.
         }
 
         /// <summary>
@@ -28,26 +27,22 @@ namespace LightConversion.Storage.Settings {
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
         public new void Initialize(Logger logger) {
-            if (IsInitialized) return;
+            if (_isInitialized) return;
 
             if (logger == null) {
                 throw new InvalidOperationException($"Argument {nameof(logger)} can't be null. Use {nameof(LogManager.CreateNullLogger)} instead.");
             }
 
             base.Initialize(logger);
-            if (base.IsInitialized == false) {
-                // TODO: log here.
-                return;
-            }
-
             _logger = logger;
 
-            string fileDirectory;
-            string fileName;
+            var fileDirectory = "";
+            var fileName = "";
             try {
                 fileName = System.IO.Path.GetFileName(Path);
             }
             catch (Exception ex) {
+                _logger.Error(ex, "Failed to parse file name.");
                 throw new InvalidOperationException("Failed to parse file name.", ex);
             }
 
@@ -55,6 +50,7 @@ namespace LightConversion.Storage.Settings {
                 fileDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path));
             }
             catch (Exception ex) {
+                _logger.Error(ex, "Failed to parse directory path.");
                 throw new InvalidOperationException("Failed to parse directory path.", ex);
             }
 
@@ -63,6 +59,7 @@ namespace LightConversion.Storage.Settings {
                 _fileWatcher = new FileSystemWatcher(fileDirectory);
             }
             catch (Exception ex) {
+                _logger.Error(ex, "Failed to create FileSystemWatcher.");
                 throw new InvalidOperationException("Failed to create FileSystemWatcher.", ex);
             }
 
@@ -72,27 +69,7 @@ namespace LightConversion.Storage.Settings {
             _fileWatcher.Error += OnError;
             _fileWatcher.Filter = fileName;
             _fileWatcher.EnableRaisingEvents = true;
-            IsInitialized = true;
-        }
-
-
-        public new bool TryWriteAllBytes(byte[] bytesToWrite) {
-            if (IsInitialized == false) {
-                // TODO: log.error ("Object is not initialized or failed to initialize.", $"Function {nameof(TryWriteAllBytes)}()");
-                return false;
-            }
-
-            // Let's not rise multiple Changed event with single write operation. Disabling watcher for now.
-            if (_fileWatcher != null) _fileWatcher.EnableRaisingEvents = false;
-
-            var writeOperationResult = base.TryWriteAllBytes(bytesToWrite);
-
-            // Make sure to reenable watcher before leaving method.
-            if ((_fileWatcher != null) && (_fileWatcher.EnableRaisingEvents == false)) {
-                _fileWatcher.EnableRaisingEvents = true;
-            }
-
-            return writeOperationResult;
+            _isInitialized = true;
         }
 
         private void HandleFileChangedEvent(object sender, FileSystemEventArgs e) {
@@ -108,7 +85,6 @@ namespace LightConversion.Storage.Settings {
 
             if (isChanged) {
                 Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
-                // TODO: log.info(this, new GeneralEventArgs($"Changed: {Path}"));
             }
         }
 
@@ -117,12 +93,11 @@ namespace LightConversion.Storage.Settings {
 
             // It's a new file to watch so last write date is current.
             _lastWriteDate = File.GetLastWriteTime(Path);
-            // TODO: log.info(this, new GeneralEventArgs($"Changed: {Path}"));
             Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
         }
 
         private void OnError(object sender, ErrorEventArgs e) {
-            // TODO: log.error ("Error happened in FileSystemWatcher, message:" + e.GetException().Message, $"Function {nameof(OnError)}()");
+            _logger.Error("Error happened in FileSystemWatcher, message:" + e.GetException().Message);
         }
     }
 }
