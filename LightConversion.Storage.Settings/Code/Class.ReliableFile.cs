@@ -5,7 +5,6 @@ using NLog;
 
 namespace LightConversion.Storage.Settings {
     public class ReliableFile {
-        private bool _isInitialized;
         public string Path { get; }
         public ReliableFile(string filePath) {
             // Building all the file paths we'll be using in this class.
@@ -24,6 +23,7 @@ namespace LightConversion.Storage.Settings {
         private readonly string _rf2FilePath;
         private readonly object _lock = new object();
         private Logger _logger;
+        private bool _isInitialized;
 
         /// <summary>
         /// Initialize ReliableFile object. Try to recover file if last write operation failed. Start listening for file changes.

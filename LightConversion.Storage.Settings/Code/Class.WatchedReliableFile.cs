@@ -4,10 +4,11 @@ using NLog;
 
 namespace LightConversion.Storage.Settings {
     public class WatchedReliableFile : ReliableFile {
+        public event GeneralEventHandler Changed;
+        
         private bool _isInitialized;
         private FileSystemWatcher _fileWatcher;
         private DateTime _lastWriteDate;
-        public event GeneralEventHandler Changed;
         private Logger _logger;
 
         public WatchedReliableFile(string filePath) : base(filePath) {
