@@ -18,8 +18,7 @@ namespace LightConversion.Software.Settings.Tests {
             try {
                 reliableFile.Initialize();
                 Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
-            }
-            catch (Exception) {
+            } catch (Exception) {
                 // All good.
             }
         }
@@ -214,7 +213,7 @@ namespace LightConversion.Software.Settings.Tests {
             } catch (Exception) {
                 // This should happen - all good.
             }
-            
+
             var logFileAfterInitialize = File.ReadAllText(logFilePath);
             Assert.IsTrue(logFileAfterInitialize.Length > 0);
         }

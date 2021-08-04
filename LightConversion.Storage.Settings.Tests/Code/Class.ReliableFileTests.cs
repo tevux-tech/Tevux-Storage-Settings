@@ -165,7 +165,7 @@ namespace LightConversion.Software.Settings.Tests {
                 }
             }
         }
-        
+
         [TestMethod]
         public void TestLogging() {
             CreateCleanTempFolder();
@@ -196,7 +196,7 @@ namespace LightConversion.Software.Settings.Tests {
             var logFileAfterWrite = File.ReadAllText(logFilePath);
             Assert.IsTrue(logFileBeforeWrite.Length != logFileAfterWrite.Length);
         }
-        
+
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
                 if (File.Exists("temp/someFile.txt")) {

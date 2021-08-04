@@ -43,16 +43,14 @@ namespace LightConversion.Storage.Settings {
             var fileName = "";
             try {
                 fileName = System.IO.Path.GetFileName(Path);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.Error(ex, "Failed to parse file name.");
                 throw new InvalidOperationException("Failed to parse file name.", ex);
             }
 
             try {
                 fileDirectory = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(Path));
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.Error(ex, "Failed to parse directory path.");
                 throw new InvalidOperationException("Failed to parse directory path.", ex);
             }
@@ -60,8 +58,7 @@ namespace LightConversion.Storage.Settings {
             // Initialize file system watcher.
             try {
                 _fileWatcher = new FileSystemWatcher(fileDirectory);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.Error(ex, "Failed to create FileSystemWatcher.");
                 throw new InvalidOperationException("Failed to create FileSystemWatcher.", ex);
             }

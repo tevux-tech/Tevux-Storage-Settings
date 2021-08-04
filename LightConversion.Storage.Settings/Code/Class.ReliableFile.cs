@@ -9,19 +9,20 @@ namespace LightConversion.Storage.Settings {
     /// </summary>
     public class ReliableFile {
         public string Path { get; }
+
         private enum FileHealth {
             Intact,
             Recoverable,
             Littered,
             Unrecoverable
         }
-        
+
         private readonly string _rf1FilePath;
         private readonly string _rf2FilePath;
         private readonly object _lock = new object();
         private Logger _logger;
         private bool _isInitialized;
-        
+
         public ReliableFile(string filePath) {
             // Building all the file paths we'll be using in this class.
             Path = filePath;
@@ -75,8 +76,7 @@ namespace LightConversion.Storage.Settings {
             // Taking action to fix file, if issues present.
             if (state == FileHealth.Intact) {
                 // All good, file structure is intact.
-            }
-            else if (state == FileHealth.Recoverable) {
+            } else if (state == FileHealth.Recoverable) {
                 // Something is not right, but rf2 is present, so restoring from it.
                 _logger.Warn($"Recovering from \"{_rf2FilePath}\".");
                 lock (_lock) {
@@ -84,30 +84,25 @@ namespace LightConversion.Storage.Settings {
                         File.Delete(Path);
                         File.Delete(_rf1FilePath);
                         File.Move(_rf2FilePath, Path);
-                    }
-                    catch (IOException ex) {
+                    } catch (IOException ex) {
                         _logger.Error(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
                     }
                 }
-            }
-            else if (state == FileHealth.Littered) {
+            } else if (state == FileHealth.Littered) {
                 // Last write is probably lost, but main file is still there. Just cleaning up.
                 _logger.Warn($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
                 try {
                     File.Delete(_rf1FilePath);
-                }
-                catch (IOException ex) {
+                } catch (IOException ex) {
                     _logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
                 }
-            }
-            else if (state == FileHealth.Unrecoverable) {
+            } else if (state == FileHealth.Unrecoverable) {
                 // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
                 _logger.Error("File is unrecoverable. Probably last saving crashed at some point.");
 
                 try {
                     File.Delete(_rf1FilePath);
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     _logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
                 }
             }
@@ -153,17 +148,14 @@ namespace LightConversion.Storage.Settings {
                     try {
                         fileContent = File.ReadAllBytes(Path);
                         returnValue = true;
-                    }
-                    catch (IOException ex) {
+                    } catch (IOException ex) {
                         _logger.Error(ex, "Reading file failed because of IOException.");
                         returnValue = false;
-                    }
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         _logger.Error(ex, "Reading file failed because of general Exception.");
                         returnValue = false;
                     }
-                }
-                else {
+                } else {
                     _logger.Error("Reading file failed because it doesn't exist.");
                     returnValue = false;
                 }
@@ -196,12 +188,10 @@ namespace LightConversion.Storage.Settings {
                     File.Delete(Path);
                     File.Move(_rf2FilePath, Path);
                     returnValue = true;
-                }
-                catch (IOException ex) {
+                } catch (IOException ex) {
                     _logger.Error(ex, "Writing to file failed because of IOException.");
                     returnValue = false;
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     _logger.Error(ex, "Writing to file failed because of general Exception.");
                     returnValue = false;
                 }

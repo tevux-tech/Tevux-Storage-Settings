@@ -28,8 +28,7 @@ namespace LightConversion.Storage.Settings {
             if (DataFile.TryReadAllBytes(out var fileBytes)) {
                 try {
                     _dataCache = JsonSerializer.Deserialize<Dictionary<string, object>>(fileBytes);
-                }
-                catch (JsonParsingException ex) {
+                } catch (JsonParsingException ex) {
                     _logger.Error(ex, $"Deserializing \"{dataFile.Path}\" failed. File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file. File content: {Encoding.UTF8.GetString(fileBytes)}");
 
                     var backupFilePath = DataFile.Path + ".backup";
@@ -38,8 +37,7 @@ namespace LightConversion.Storage.Settings {
                     DataFile.TryWriteAllText("{}");
                     _dataCache = new Dictionary<string, object>();
                 }
-            }
-            else {
+            } else {
                 _logger.Error($"Reading from \"{DataFile.Path}\" failed. No settings will be loaded.");
                 _dataCache = new Dictionary<string, object>();
             }

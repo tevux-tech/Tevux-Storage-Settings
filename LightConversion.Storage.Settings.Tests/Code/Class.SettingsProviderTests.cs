@@ -141,8 +141,7 @@ namespace LightConversion.Software.Settings.Tests {
                 var settingsFile = new ReliableFile("temp/someSettings.json");
                 settingsFile.Initialize();
                 settings.Initialize(settingsFile);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 Assert.Fail("Initialization shouldn't throw any exceptions", ex);
             }
         }
@@ -183,8 +182,7 @@ namespace LightConversion.Software.Settings.Tests {
                 var settingsFile2 = new ReliableFile("temp/someSettings.json");
                 settingsFile2.Initialize();
                 settings.Initialize(settingsFile2);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 Assert.Fail("No exception should be thrown", ex);
             }
         }
