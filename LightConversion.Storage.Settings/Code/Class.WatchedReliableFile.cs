@@ -69,7 +69,7 @@ namespace LightConversion.Storage.Settings {
             _fileWatcher.Changed += HandleFileChangedEvent;
             _fileWatcher.Created += HandleFileCreatedEvent;
             _fileWatcher.Renamed += HandleFileCreatedEvent;
-            _fileWatcher.Error += OnError;
+            _fileWatcher.Error += HandleFileSystemWatcherErrorEvent;
             _fileWatcher.Filter = fileName;
             _fileWatcher.EnableRaisingEvents = true;
             _isInitialized = true;
@@ -102,7 +102,7 @@ namespace LightConversion.Storage.Settings {
         /// <summary>
         /// Handle internal <see cref="FileSystemWatcher"/> errors.
         /// </summary>
-        private void OnError(object sender, ErrorEventArgs e) {
+        private void HandleFileSystemWatcherErrorEvent(object sender, ErrorEventArgs e) {
             _logger.Error("Error happened in FileSystemWatcher, message:" + e.GetException().Message);
         }
     }
