@@ -66,7 +66,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Code\Class.WatchedReliableFileChangedEventTests.cs" />
+    <Compile Include="Code\Class.WatchedReliableFileTests.cs" />
     <Compile Include="Code\Class.SettingsProviderTests.cs" />
     <Compile Include="Code\Class.ReliableFileTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

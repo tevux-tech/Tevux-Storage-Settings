@@ -298,12 +298,12 @@ namespace LightConversion.Software.Settings.Tests {
             var settings = new SettingsProvider();
             settings.Initialize(reliableFile, logger);
 
-            var logFileBeforeWrite = File.ReadAllText(logFilePath);
+            var logFileBeforeGetSetting = File.ReadAllText(logFilePath);
             var isOk = settings.TryGet("SomeNonExistingSettingName", out float _);
             Assert.IsFalse(isOk);
-            var logFileAfterWrite = File.ReadAllText(logFilePath);
+            var logFileAfterGetSetting = File.ReadAllText(logFilePath);
 
-            Assert.IsTrue(logFileBeforeWrite.Length != logFileAfterWrite.Length);
+            Assert.IsTrue(logFileBeforeGetSetting.Length != logFileAfterGetSetting.Length);
         }
 
         private void CreateCleanTempFolder() {

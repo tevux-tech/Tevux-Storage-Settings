@@ -172,7 +172,8 @@ namespace LightConversion.Software.Settings.Tests {
 
             // Create logger that writes stacktrace to log file.
             var config = new NLog.Config.LoggingConfiguration();
-            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = "temp/nlogfile.txt", Layout = Layout.FromString("${message} ${exception:format=ToString}") };
+            var logFilePath = "temp/nlogfile.txt";
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}") };
             config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
             LogManager.Configuration = config;
             var logger = LogManager.GetCurrentClassLogger();
@@ -186,13 +187,13 @@ namespace LightConversion.Software.Settings.Tests {
             // Setting file to read-only.
             File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) | FileAttributes.ReadOnly);
 
-            var logFileBeforeWrite = File.ReadAllText("temp/nlogfile.txt");
+            var logFileBeforeWrite = File.ReadAllText(logFilePath);
             reliableFile.TryWriteAllText("This should never be written cuz of read-only file attribute.");
 
             // Remove read-only attribute from file.
             File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) & ~FileAttributes.ReadOnly);
 
-            var logFileAfterWrite = File.ReadAllText("temp/nlogfile.txt");
+            var logFileAfterWrite = File.ReadAllText(logFilePath);
             Assert.IsTrue(logFileBeforeWrite.Length != logFileAfterWrite.Length);
         }
         

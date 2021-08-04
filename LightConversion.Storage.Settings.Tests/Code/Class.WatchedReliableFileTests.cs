@@ -8,7 +8,7 @@ using NLog.Layouts;
 
 namespace LightConversion.Software.Settings.Tests {
     [TestClass]
-    public class WatchedReliableFileChangedEventTests {
+    public class WatchedReliableFileTests {
         [TestMethod]
         public void TestFailedInitialize() {
             CreateCleanTempFolder();
@@ -201,36 +201,27 @@ namespace LightConversion.Software.Settings.Tests {
 
             // Create logger that writes stacktrace to log file.
             var config = new NLog.Config.LoggingConfiguration();
-            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = "temp/nlogfile.txt", Layout = Layout.FromString("${message} ${exception:format=ToString}") };
+            var logFilePath = "temp/nlogfile.txt";
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}") };
             config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
             LogManager.Configuration = config;
             var logger = LogManager.GetCurrentClassLogger();
 
-            var testFilePath = "temp/someFile.txt";
-            var reliableFile = new WatchedReliableFile(testFilePath);
-            reliableFile.Initialize(logger);
-
-            reliableFile.TryWriteAllText("Reliable write to file.");
-
-            // Setting file to read-only.
-            File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) | FileAttributes.ReadOnly);
-
-            var logFileBeforeWrite = File.ReadAllText("temp/nlogfile.txt");
-            reliableFile.TryWriteAllText("This should never be written cuz of read-only file attribute.");
-
-            // Remove read-only attribute from file.
-            File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) & ~FileAttributes.ReadOnly);
-
-            var logFileAfterWrite = File.ReadAllText("temp/nlogfile.txt");
-            Assert.IsTrue(logFileBeforeWrite.Length != logFileAfterWrite.Length);
+            var testFilePath = "temp/invalid???fileName.txt";
+            var watchedReliableFile = new WatchedReliableFile(testFilePath);
+            try {
+                watchedReliableFile.Initialize(logger);
+            } catch (Exception) {
+                // This should happen - all good.
+            }
+            
+            var logFileAfterInitialize = File.ReadAllText(logFilePath);
+            Assert.IsTrue(logFileAfterInitialize.Length > 0);
         }
+
 
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
-                if (File.Exists("temp/someFile.txt")) {
-                    File.SetAttributes("temp/someFile.txt", File.GetAttributes("temp/someFile.txt") & ~FileAttributes.ReadOnly);
-                }
-
                 Directory.Delete("temp", true);
             }
 
