@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NLog;
+using NLog.Layouts;
 
 namespace LightConversion.Software.Settings.Tests {
     [TestClass]
@@ -80,7 +81,7 @@ namespace LightConversion.Software.Settings.Tests {
             // We need to release main thread and wait for changed event.
             await Task.Delay(10);
             Assert.AreEqual("Changing file content.", lastFileContent);
-            
+
             reliableFile.TryWriteAllText("Changing 2nd time.");
 
             await Task.Delay(10);
@@ -194,8 +195,42 @@ namespace LightConversion.Software.Settings.Tests {
             Assert.AreEqual(0, changedCounter, "Delete should not rise any changed events.");
         }
 
+        [TestMethod]
+        public async Task TestLogging() {
+            CreateCleanTempFolder();
+
+            // Create logger that writes stacktrace to log file.
+            var config = new NLog.Config.LoggingConfiguration();
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = "temp/nlogfile.txt", Layout = Layout.FromString("${message} ${exception:format=ToString}") };
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+            LogManager.Configuration = config;
+            var logger = LogManager.GetCurrentClassLogger();
+
+            var testFilePath = "temp/someFile.txt";
+            var reliableFile = new WatchedReliableFile(testFilePath);
+            reliableFile.Initialize(logger);
+
+            reliableFile.TryWriteAllText("Reliable write to file.");
+
+            // Setting file to read-only.
+            File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) | FileAttributes.ReadOnly);
+
+            var logFileBeforeWrite = File.ReadAllText("temp/nlogfile.txt");
+            reliableFile.TryWriteAllText("This should never be written cuz of read-only file attribute.");
+
+            // Remove read-only attribute from file.
+            File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) & ~FileAttributes.ReadOnly);
+
+            var logFileAfterWrite = File.ReadAllText("temp/nlogfile.txt");
+            Assert.IsTrue(logFileBeforeWrite.Length != logFileAfterWrite.Length);
+        }
+
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
+                if (File.Exists("temp/someFile.txt")) {
+                    File.SetAttributes("temp/someFile.txt", File.GetAttributes("temp/someFile.txt") & ~FileAttributes.ReadOnly);
+                }
+
                 Directory.Delete("temp", true);
             }
 
