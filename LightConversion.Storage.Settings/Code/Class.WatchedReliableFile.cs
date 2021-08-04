@@ -33,7 +33,7 @@ namespace LightConversion.Storage.Settings {
             if (_isInitialized) return;
 
             if (logger == null) {
-                throw new InvalidOperationException($"Argument {nameof(logger)} can't be null. Use {nameof(LogManager.CreateNullLogger)} instead.");
+                throw new InvalidOperationException($"Argument {nameof(logger)} can't be null.");
             }
 
             base.Initialize(logger);

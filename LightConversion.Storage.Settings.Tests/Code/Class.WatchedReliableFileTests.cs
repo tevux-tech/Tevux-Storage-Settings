@@ -16,7 +16,7 @@ namespace LightConversion.Software.Settings.Tests {
             var reliableFile = new WatchedReliableFile("QuestionMark?IsNotAllowedInFileName.txt");
 
             try {
-                reliableFile.Initialize(LogManager.CreateNullLogger());
+                reliableFile.Initialize();
                 Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
             }
             catch (Exception) {
