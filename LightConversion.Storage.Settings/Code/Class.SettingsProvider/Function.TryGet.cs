@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text;
+using Utf8Json;
 
 namespace LightConversion.Storage.Settings {
     public partial class SettingsProvider {
@@ -9,7 +11,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match integer.", $"Function {nameof(TryGet)}(out int)");
+                    _logger.Error($"Can't get setting with key \"{key}\" because it is already set and type does not match integer. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
                     isOk = false;
                 }
             }
@@ -24,14 +26,14 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match double.", $"Function {nameof(TryGet)}(out double)");
+                    _logger.Error($"Can't get setting with key \"{key}\" because it is already set and type does not match double. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
                     isOk = false;
                 }
             }
 
             return isOk;
         }
-        
+
         public bool TryGet(string key, out float value) {
             bool isOk;
             value = 0;
@@ -39,7 +41,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match float.", $"Function {nameof(TryGet)}(out float)");
+                    _logger.Error($"Can't get setting with key \"{key}\" because it is already set and type does not match float. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
                     isOk = false;
                 }
             }
@@ -54,7 +56,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match boolean.", $"Function {nameof(TryGet)}(out bool)");
+                    _logger.Error($"Can't get setting with key \"{key}\" because it is already set and type does not match boolean. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
                     isOk = false;
                 }
             }
@@ -69,7 +71,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match string.", $"Function {nameof(TryGet)}(out string)");
+                    _logger.Error($"Can't get setting with key \"{key}\" because it is already set and type does not match string. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
                     isOk = false;
                 }
             }
@@ -84,7 +86,7 @@ namespace LightConversion.Storage.Settings {
             isOk = TryGetInternal(key, out var valueOfUnknownType);
             if (isOk) {
                 if (TryConvert(valueOfUnknownType, out value) == false) {
-                    HandleNonCriticalError($"Can't get setting with key \"{key}\" because it is already set and type does not match DateTime.", $"Function {nameof(TryGet)}(out DateTime)");
+                    _logger.Error($"Can't get setting with key \"{key}\" because it is already set and type does not match DateTime. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
                     isOk = false;
                 }
             }

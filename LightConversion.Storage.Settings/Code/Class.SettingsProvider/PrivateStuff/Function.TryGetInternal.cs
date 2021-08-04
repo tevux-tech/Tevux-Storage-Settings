@@ -8,7 +8,7 @@
             }
 
             if (isOk == false) {
-                HandleNonCriticalError($"Can't get setting with key \"{key}\" because it doesn't exist.", $"Function {nameof(TryGetInternal)}()");
+                _logger.Error($"Can't get setting with key \"{key}\" because it doesn't exist.");
             }
 
             return isOk;
