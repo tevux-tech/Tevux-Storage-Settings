@@ -196,7 +196,7 @@ namespace LightConversion.Software.Settings.Tests {
         }
 
         [TestMethod]
-        public async Task TestLogging() {
+        public void TestLogging() {
             CreateCleanTempFolder();
 
             // Create logger that writes stacktrace to log file.
