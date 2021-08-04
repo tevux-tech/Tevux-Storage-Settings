@@ -4,26 +4,30 @@ using System.Text;
 using NLog;
 
 namespace LightConversion.Storage.Settings {
+    /// <summary>
+    /// Class executes file read/write operations reliably. If system fails at write operation original file content will be restored.
+    /// </summary>
     public class ReliableFile {
         public string Path { get; }
-        public ReliableFile(string filePath) {
-            // Building all the file paths we'll be using in this class.
-            Path = filePath;
-            _rf1FilePath = filePath + ".rf1";
-            _rf2FilePath = filePath + ".rf2";
-        }
-
         private enum FileHealth {
             Intact,
             Recoverable,
             Littered,
             Unrecoverable
         }
+        
         private readonly string _rf1FilePath;
         private readonly string _rf2FilePath;
         private readonly object _lock = new object();
         private Logger _logger;
         private bool _isInitialized;
+        
+        public ReliableFile(string filePath) {
+            // Building all the file paths we'll be using in this class.
+            Path = filePath;
+            _rf1FilePath = filePath + ".rf1";
+            _rf2FilePath = filePath + ".rf2";
+        }
 
         /// <summary>
         /// Initialize ReliableFile object. Try to recover file if last write operation failed. Start listening for file changes.

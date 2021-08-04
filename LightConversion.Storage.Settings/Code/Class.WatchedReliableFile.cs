@@ -3,9 +3,11 @@ using System.IO;
 using NLog;
 
 namespace LightConversion.Storage.Settings {
+    /// <summary>
+    /// Class tracks file changes and rises <see cref="Changed"/> event. File changes can also happen outside application scope.
+    /// </summary>
     public class WatchedReliableFile : ReliableFile {
         public event GeneralEventHandler Changed;
-        
         private bool _isInitialized;
         private FileSystemWatcher _fileWatcher;
         private DateTime _lastWriteDate;
@@ -97,6 +99,9 @@ namespace LightConversion.Storage.Settings {
             Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
         }
 
+        /// <summary>
+        /// Handle internal <see cref="FileSystemWatcher"/> errors.
+        /// </summary>
         private void OnError(object sender, ErrorEventArgs e) {
             _logger.Error("Error happened in FileSystemWatcher, message:" + e.GetException().Message);
         }
