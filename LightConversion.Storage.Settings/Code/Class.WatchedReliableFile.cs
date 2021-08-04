@@ -7,7 +7,7 @@ namespace LightConversion.Storage.Settings {
     /// Class tracks file changes and rises <see cref="Changed"/> event. File changes can also happen outside application scope.
     /// </summary>
     public class WatchedReliableFile : ReliableFile {
-        public event GeneralEventHandler Changed;
+        public event EventHandler Changed;
         private bool _isInitialized;
         private FileSystemWatcher _fileWatcher;
         private DateTime _lastWriteDate;
@@ -87,7 +87,7 @@ namespace LightConversion.Storage.Settings {
             }
 
             if (isChanged) {
-                Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
+                Changed?.Invoke(this, new EventArgs());
             }
         }
 
@@ -96,7 +96,8 @@ namespace LightConversion.Storage.Settings {
 
             // It's a new file to watch so last write date is current.
             _lastWriteDate = File.GetLastWriteTime(Path);
-            Changed?.Invoke(this, new GeneralEventArgs($"Changed: {Path}"));
+
+            Changed?.Invoke(this, new EventArgs());
         }
 
         /// <summary>
