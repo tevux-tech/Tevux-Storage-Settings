@@ -154,6 +154,10 @@ namespace LightConversion.Storage.Settings {
                         _logger.Error(ex, "Reading file failed because of IOException.");
                         returnValue = false;
                     }
+                    catch (Exception ex) {
+                        _logger.Error(ex, "Reading file failed because of general Exception.");
+                        returnValue = false;
+                    }
                 }
                 else {
                     _logger.Error("Reading file failed because it doesn't exist.");
@@ -191,6 +195,10 @@ namespace LightConversion.Storage.Settings {
                 }
                 catch (IOException ex) {
                     _logger.Error(ex, "Writing to file failed because of IOException.");
+                    returnValue = false;
+                }
+                catch (Exception ex) {
+                    _logger.Error(ex, "Writing to file failed because of general Exception.");
                     returnValue = false;
                 }
             }
