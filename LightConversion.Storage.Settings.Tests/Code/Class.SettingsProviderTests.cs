@@ -2,6 +2,8 @@
 using System.IO;
 using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NLog;
+using NLog.Layouts;
 
 namespace LightConversion.Software.Settings.Tests {
     [TestClass]
@@ -139,7 +141,8 @@ namespace LightConversion.Software.Settings.Tests {
                 var settingsFile = new ReliableFile("temp/someSettings.json");
                 settingsFile.Initialize();
                 settings.Initialize(settingsFile);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 Assert.Fail("Initialization shouldn't throw any exceptions", ex);
             }
         }
@@ -180,7 +183,8 @@ namespace LightConversion.Software.Settings.Tests {
                 var settingsFile2 = new ReliableFile("temp/someSettings.json");
                 settingsFile2.Initialize();
                 settings.Initialize(settingsFile2);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex) {
                 Assert.Fail("No exception should be thrown", ex);
             }
         }
@@ -272,6 +276,34 @@ namespace LightConversion.Software.Settings.Tests {
             isOk = settings.TryGet("SomeDoubleNumber", out float loadedSetting);
             Assert.IsTrue(isOk);
             Assert.AreEqual((float)someDoubleSetting, loadedSetting);
+        }
+
+
+        [TestMethod]
+        public void TestLogging() {
+            CreateCleanTempFolder();
+
+            // Create logger that writes stacktrace to log file.
+            var config = new NLog.Config.LoggingConfiguration();
+            var logFilePath = "temp/nlogfile.txt";
+            var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}") };
+            config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
+            LogManager.Configuration = config;
+            var logger = LogManager.GetCurrentClassLogger();
+
+            var settingsFilePath = "temp/someSettings.json";
+            var reliableFile = new ReliableFile(settingsFilePath);
+            reliableFile.Initialize();
+
+            var settings = new SettingsProvider();
+            settings.Initialize(reliableFile, logger);
+
+            var logFileBeforeWrite = File.ReadAllText(logFilePath);
+            var isOk = settings.TryGet("SomeNonExistingSettingName", out float _);
+            Assert.IsFalse(isOk);
+            var logFileAfterWrite = File.ReadAllText(logFilePath);
+
+            Assert.IsTrue(logFileBeforeWrite.Length != logFileAfterWrite.Length);
         }
 
         private void CreateCleanTempFolder() {
