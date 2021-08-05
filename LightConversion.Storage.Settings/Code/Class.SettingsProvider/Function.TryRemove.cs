@@ -20,7 +20,7 @@
             }
 
             if (isOk == false) {
-                _logger.Error(errorMessage);
+                Logger.Error(errorMessage);
             }
 
             return isOk;

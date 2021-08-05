@@ -8,7 +8,8 @@ namespace LightConversion.Storage.Settings {
     /// Class executes file read/write operations reliably. If system fails at write operation original file content will be restored.
     /// </summary>
     public class ReliableFile {
-        public string Path { get; }
+        public string Path { get; private set; }
+        public Logger Logger = LogManager.CreateNullLogger();
 
         private enum FileHealth {
             Intact,
@@ -17,39 +18,21 @@ namespace LightConversion.Storage.Settings {
             Unrecoverable
         }
 
-        private readonly string _rf1FilePath;
-        private readonly string _rf2FilePath;
+        private string _rf1FilePath;
+        private string _rf2FilePath;
         private readonly object _lock = new object();
-        private Logger _logger;
         private bool _isInitialized;
-
-        public ReliableFile(string filePath) {
-            // Building all the file paths we'll be using in this class.
-            Path = filePath;
-            _rf1FilePath = filePath + ".rf1";
-            _rf2FilePath = filePath + ".rf2";
-        }
-
-        /// <summary>
-        /// Initialize ReliableFile object. Try to recover file if last write operation failed. Start listening for file changes.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
-        public void Initialize() {
-            Initialize(LogManager.CreateNullLogger());
-        }
 
         /// <summary>
         /// Initialize ReliableFile object. Try to recover file if last write operation failed.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
-        public void Initialize(Logger logger) {
+        public virtual void Initialize(string filePath) {
             if (_isInitialized) return;
 
-            if (logger == null) {
-                throw new InvalidOperationException($"Argument {nameof(logger)} can't be null.");
-            }
-
-            _logger = logger;
+            Path = filePath;
+            _rf1FilePath = filePath + ".rf1";
+            _rf2FilePath = filePath + ".rf2";
 
             var mainFileExists = false;
             var rf1FileExists = false;
@@ -78,32 +61,32 @@ namespace LightConversion.Storage.Settings {
                 // All good, file structure is intact.
             } else if (state == FileHealth.Recoverable) {
                 // Something is not right, but rf2 is present, so restoring from it.
-                _logger.Warn($"Recovering from \"{_rf2FilePath}\".");
+                Logger.Warn($"Recovering from \"{_rf2FilePath}\".");
                 lock (_lock) {
                     try {
                         File.Delete(Path);
                         File.Delete(_rf1FilePath);
                         File.Move(_rf2FilePath, Path);
                     } catch (IOException ex) {
-                        _logger.Error(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
+                        Logger.Error(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
                     }
                 }
             } else if (state == FileHealth.Littered) {
                 // Last write is probably lost, but main file is still there. Just cleaning up.
-                _logger.Warn($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
+                Logger.Warn($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
                 try {
                     File.Delete(_rf1FilePath);
                 } catch (IOException ex) {
-                    _logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
+                    Logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
                 }
             } else if (state == FileHealth.Unrecoverable) {
                 // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
-                _logger.Error("File is unrecoverable. Probably last saving crashed at some point.");
+                Logger.Error("File is unrecoverable. Probably last saving crashed at some point.");
 
                 try {
                     File.Delete(_rf1FilePath);
                 } catch (Exception ex) {
-                    _logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
+                    Logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
                 }
             }
 
@@ -112,7 +95,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool Exists() {
             if (_isInitialized == false) {
-                _logger.Error("Object is not initialized or failed to initialize.");
+                Logger.Error("Object is not initialized or failed to initialize.");
                 return false;
             }
 
@@ -121,7 +104,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool TryReadAllText(out string fileContent) {
             if (_isInitialized == false) {
-                _logger.Error("Object is not initialized or failed to initialize.");
+                Logger.Error("Object is not initialized or failed to initialize.");
                 fileContent = "";
                 return false;
             }
@@ -136,7 +119,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool TryReadAllBytes(out byte[] fileContent) {
             if (_isInitialized == false) {
-                _logger.Error("Object is not initialized or failed to initialize.");
+                Logger.Error("Object is not initialized or failed to initialize.");
                 fileContent = new byte[0];
                 return false;
             }
@@ -149,14 +132,14 @@ namespace LightConversion.Storage.Settings {
                         fileContent = File.ReadAllBytes(Path);
                         returnValue = true;
                     } catch (IOException ex) {
-                        _logger.Error(ex, "Reading file failed because of IOException.");
+                        Logger.Error(ex, "Reading file failed because of IOException.");
                         returnValue = false;
                     } catch (Exception ex) {
-                        _logger.Error(ex, "Reading file failed because of general Exception.");
+                        Logger.Error(ex, "Reading file failed because of general Exception.");
                         returnValue = false;
                     }
                 } else {
-                    _logger.Error("Reading file failed because it doesn't exist.");
+                    Logger.Error("Reading file failed because it doesn't exist.");
                     returnValue = false;
                 }
             }
@@ -166,7 +149,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool TryWriteAllText(string textToWrite) {
             if (_isInitialized == false) {
-                _logger.Error("Object is not initialized or failed to initialize.");
+                Logger.Error("Object is not initialized or failed to initialize.");
                 return false;
             }
 
@@ -175,7 +158,7 @@ namespace LightConversion.Storage.Settings {
 
         public bool TryWriteAllBytes(byte[] bytesToWrite) {
             if (_isInitialized == false) {
-                _logger.Error("Object is not initialized or failed to initialize.");
+                Logger.Error("Object is not initialized or failed to initialize.");
                 return false;
             }
 
@@ -189,10 +172,10 @@ namespace LightConversion.Storage.Settings {
                     File.Move(_rf2FilePath, Path);
                     returnValue = true;
                 } catch (IOException ex) {
-                    _logger.Error(ex, "Writing to file failed because of IOException.");
+                    Logger.Error(ex, "Writing to file failed because of IOException.");
                     returnValue = false;
                 } catch (Exception ex) {
-                    _logger.Error(ex, "Writing to file failed because of general Exception.");
+                    Logger.Error(ex, "Writing to file failed because of general Exception.");
                     returnValue = false;
                 }
             }

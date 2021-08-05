@@ -11,7 +11,7 @@ namespace LightConversion.Storage.Settings {
             }
 
             if (isOk == false) {
-                _logger.Error($"Setting \"{key}\" to {value} failed because writing to file failed.");
+                Logger.Error($"Setting \"{key}\" to {value} failed because writing to file failed.");
             }
 
             return isOk;

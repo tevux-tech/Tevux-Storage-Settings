@@ -16,8 +16,8 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             var settings = new SettingsProvider();
-            var settingsFile = new ReliableFile("temp/someSettings.json");
-            settingsFile.Initialize();
+            var settingsFile = new ReliableFile();
+            settingsFile.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile);
 
             settings.TrySet("SomeIntegerKey", 123);
@@ -54,8 +54,8 @@ namespace LightConversion.Software.Settings.Tests {
             }");
 
             var settings = new SettingsProvider();
-            var settingsFile = new ReliableFile("temp/someSettings.json");
-            settingsFile.Initialize();
+            var settingsFile = new ReliableFile();
+            settingsFile.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile);
 
             var isOk = settings.TryGet("SomeIntegerKey", out int someIntegerValue);
@@ -80,8 +80,8 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             var settings = new SettingsProvider();
-            var settingsFile = new ReliableFile("temp/someSettings.json");
-            settingsFile.Initialize();
+            var settingsFile = new ReliableFile();
+            settingsFile.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile);
 
             var isOk = settings.TrySet("SomeDoubleKey", 3.1415);
@@ -116,8 +116,8 @@ namespace LightConversion.Software.Settings.Tests {
             }");
 
             var settings = new SettingsProvider();
-            var settingsFile = new ReliableFile("temp/someSettings.json");
-            settingsFile.Initialize();
+            var settingsFile = new ReliableFile();
+            settingsFile.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile);
 
             var isOk = settings.TryGet("SomeIntegerKey", out int someInteger);
@@ -138,8 +138,8 @@ namespace LightConversion.Software.Settings.Tests {
             var settings = new SettingsProvider();
 
             try {
-                var settingsFile = new ReliableFile("temp/someSettings.json");
-                settingsFile.Initialize();
+                var settingsFile = new ReliableFile();
+                settingsFile.Initialize("temp/someSettings.json");
                 settings.Initialize(settingsFile);
             } catch (Exception ex) {
                 Assert.Fail("Initialization shouldn't throw any exceptions", ex);
@@ -153,8 +153,8 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someSettings.json", "Invalid json text");
 
             var settings = new SettingsProvider();
-            var settingsFile = new ReliableFile("temp/someSettings.json");
-            settingsFile.Initialize();
+            var settingsFile = new ReliableFile();
+            settingsFile.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile);
 
             var isBackupCreated = File.Exists(settings.DataFile.Path + ".backup");
@@ -171,16 +171,16 @@ namespace LightConversion.Software.Settings.Tests {
             File.WriteAllText("temp/someSettings.json", "Invalid json text");
 
             var settings = new SettingsProvider();
-            var settingsFile = new ReliableFile("temp/someSettings.json");
-            settingsFile.Initialize();
+            var settingsFile = new ReliableFile();
+            settingsFile.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile);
 
             File.WriteAllText("temp/someSettings.json", "Invalid json text again...");
 
             try {
                 settings = new SettingsProvider();
-                var settingsFile2 = new ReliableFile("temp/someSettings.json");
-                settingsFile2.Initialize();
+                var settingsFile2 = new ReliableFile();
+                settingsFile2.Initialize("temp/someSettings.json");
                 settings.Initialize(settingsFile2);
             } catch (Exception ex) {
                 Assert.Fail("No exception should be thrown", ex);
@@ -193,8 +193,8 @@ namespace LightConversion.Software.Settings.Tests {
               ""SomeDateTimeKey"": ""1234-05-06T07:08:09""
             }";
 
-            var reliableFile = new ReliableFile("temp/someSettings.json");
-            reliableFile.Initialize();
+            var reliableFile = new ReliableFile();
+            reliableFile.Initialize("temp/someSettings.json");
             reliableFile.TryWriteAllText(json);
 
             var settings = new SettingsProvider();
@@ -212,8 +212,8 @@ namespace LightConversion.Software.Settings.Tests {
               ""SomeDateTimeKey"": ""1234-05-06T99:08:09""
             }";
 
-            var reliableFile = new ReliableFile("temp/someSettings.json");
-            reliableFile.Initialize();
+            var reliableFile = new ReliableFile();
+            reliableFile.Initialize("temp/someSettings.json");
             reliableFile.TryWriteAllText(json);
 
             var settings = new SettingsProvider();
@@ -228,8 +228,8 @@ namespace LightConversion.Software.Settings.Tests {
             CreateCleanTempFolder();
 
             var settings = new SettingsProvider();
-            var settingsFile = new ReliableFile("temp/someSettings.json");
-            settingsFile.Initialize();
+            var settingsFile = new ReliableFile();
+            settingsFile.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile);
 
             settings.TrySet("SomeIntegerKey1", 123);
@@ -245,8 +245,8 @@ namespace LightConversion.Software.Settings.Tests {
             Assert.IsTrue(settings.Contains("SomeIntegerKey2"));
 
             var settings2 = new SettingsProvider();
-            var settingsFile2 = new ReliableFile("temp/someSettings.json");
-            settingsFile2.Initialize();
+            var settingsFile2 = new ReliableFile();
+            settingsFile2.Initialize("temp/someSettings.json");
             settings2.Initialize(settingsFile2);
 
             Assert.IsFalse(settings2.Contains("SomeIntegerKey1"));
@@ -257,8 +257,8 @@ namespace LightConversion.Software.Settings.Tests {
         public void TestFloatSetting() {
             CreateCleanTempFolder();
 
-            var reliableFile = new ReliableFile("temp/someSettings.json");
-            reliableFile.Initialize();
+            var reliableFile = new ReliableFile();
+            reliableFile.Initialize("temp/someSettings.json");
 
             var settings = new SettingsProvider();
             settings.Initialize(reliableFile);
@@ -290,12 +290,11 @@ namespace LightConversion.Software.Settings.Tests {
             var logger = LogManager.GetCurrentClassLogger();
 
             var settingsFilePath = "temp/someSettings.json";
-            var reliableFile = new ReliableFile(settingsFilePath);
-            reliableFile.Initialize();
+            var reliableFile = new ReliableFile();
+            reliableFile.Initialize(settingsFilePath);
 
-            var settings = new SettingsProvider();
-            settings.Initialize(reliableFile, logger);
-
+            var settings = new SettingsProvider { Logger = logger };
+            settings.Initialize(reliableFile);
             var logFileBeforeGetSetting = File.ReadAllText(logFilePath);
             var isOk = settings.TryGet("SomeNonExistingSettingName", out float _);
             Assert.IsFalse(isOk);
