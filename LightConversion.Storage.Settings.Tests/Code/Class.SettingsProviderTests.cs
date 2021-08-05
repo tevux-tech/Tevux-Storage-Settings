@@ -303,6 +303,21 @@ namespace LightConversion.Software.Settings.Tests {
             Assert.IsTrue(logFileBeforeGetSetting.Length != logFileAfterGetSetting.Length);
         }
 
+        [TestMethod]
+        public void TestSettingsWithWatchedReliableFile() {
+            CreateCleanTempFolder();
+
+            var settingsFilePath = "temp/someSettings.json";
+            var reliableFile = new WatchedReliableFile();
+            reliableFile.Initialize(settingsFilePath);
+
+            var settings = new SettingsProvider();
+            settings.Initialize(reliableFile);
+
+            Assert.IsTrue(settings.TrySet("SomeInteger", 123456));
+            Assert.IsTrue(settings.TryGet("SomeInteger", out int _));
+        }
+
         private void CreateCleanTempFolder() {
             if (Directory.Exists("temp")) {
                 Directory.Delete("temp", true);
