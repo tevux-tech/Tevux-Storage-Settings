@@ -20,7 +20,7 @@
             }
 
             if (isOk == false) {
-                HandleNonCriticalError(errorMessage, $"Function {nameof(TryRemove)}()");
+                Logger.Error(errorMessage);
             }
 
             return isOk;
