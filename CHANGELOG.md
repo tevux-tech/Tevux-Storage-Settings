@@ -1,5 +1,11 @@
 # LightConversion.Software.Settings Changelog
 
+## [1.0.0] - 2021-08-05
+### Changed
+- Moved file watcher from ReliableFile class to separate class WatchedReliableFile (Case 7094).
+- Moved FilePath argument form ReliableFile class constructor to Initialize() function (Case 7094).
+- Changed ISilentReporter to NLog logging. Logging can be set using public property - "Logger" in all classes (Case 7094).
+
 ## [0.5.0] - 2021-06-25
 ### Added
 - Added support for float settings (Case 7016).
