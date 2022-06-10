@@ -1,5 +1,9 @@
 # LightConversion.Software.Settings Changelog
 
+## [1.0.1] - 2022-06-10
+### Changed
+- No actual changes. Added MIT licence and created github action workflow.
+
 ## [1.0.0] - 2021-08-05
 ### Changed
 - Moved file watcher from ReliableFile class to separate class WatchedReliableFile (Case 7094).
