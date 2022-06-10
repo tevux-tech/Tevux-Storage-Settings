@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    tags:
+      - "Versions/*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Read project version
+        id: get_version
+        uses: greenygh0st/net-proj-release-version@v2
+        with:
+          PROJ_FILE: LightConversion.Storage.Settings/LightConversion.Storage.Settings.csproj
+
+      - name: Set project version
+        run: echo "PROJECT_VERSION=${{steps.get_version.outputs.RELEASE_VERSION}}" >> $GITHUB_ENV
+
+      - name: Set tag version
+        run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/Versions/}" >> $GITHUB_ENV
+
+      - name: Compare project and tag version
+        run : |
+          if [ "${{env.PROJECT_VERSION}}" != "${{env.TAG_VERSION}}" ]; then
+            echo "Project version ${{env.PROJECT_VERSION}} doesn't match tag version ${{env.TAG_VERSION}}!"
+            exit 1
+          fi
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x' # SDK Version to use.
+          source-url: https://nuget.pkg.github.com/light-conversion/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Build
+        run: dotnet build --configuration Release LightConversion.Storage.Settings
+
+      - name: Publish the package to GPR
+        run: dotnet nuget push LightConversion.Storage.Settings/bin/Release/*.nupkg
