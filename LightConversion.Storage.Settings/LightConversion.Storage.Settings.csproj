@@ -9,7 +9,7 @@
     <Description>Library for reliably storing and loading application settings/data to json file.</Description>
     <Authors>Light Conversion</Authors>
     <Company>Light Conversion</Company>
-    <RepositoryUrl>https://code-dev.lightcon.com/Libraries/LightConversion-Storage-Settings</RepositoryUrl>
+    <RepositoryUrl>https://github.com/light-conversion/LightConversion-Storage-Settings</RepositoryUrl>
     <RepositoryType></RepositoryType>
     <FileVersion>1.0.0.0</FileVersion>
   </PropertyGroup>
