@@ -1,29 +1,30 @@
-﻿namespace LightConversion.Storage.Settings {
-    public partial class SettingsProvider {
-        public bool TryRemove(string key) {
-            bool isOk;
-            var errorMessage = "";
+﻿namespace LightConversion.Storage.Settings;
 
-            lock (_dataLock) {
-                if (_dataCache.Remove(key)) {
-                    var jsonBytes = Utf8Json.JsonSerializer.Serialize(_dataCache);
-                    var prettyJsonBytes = Utf8Json.JsonSerializer.PrettyPrintByteArray(jsonBytes);
-                    isOk = DataFile.TryWriteAllBytes(prettyJsonBytes);
+public partial class SettingsProvider {
+    public bool TryRemove(string key) {
+        bool isOk;
+        var errorMessage = "";
 
-                    if (isOk == false) {
-                        errorMessage = $"Removing setting \"{key}\" failed because writing to file failed.";
-                    }
-                } else {
-                    isOk = false;
-                    errorMessage = $"Can't remove \"{key}\" because it doesn't exist.";
+        lock (_dataLock) {
+            if (_dataCache.Remove(key)) {
+                var jsonBytes = Utf8Json.JsonSerializer.Serialize(_dataCache);
+                var prettyJsonBytes = Utf8Json.JsonSerializer.PrettyPrintByteArray(jsonBytes);
+                isOk = DataFile.TryWriteAllBytes(prettyJsonBytes);
+
+                if (isOk == false) {
+                    errorMessage = $"Removing setting \"{key}\" failed because writing to file failed.";
                 }
             }
-
-            if (isOk == false) {
-                Logger.Error(errorMessage);
+            else {
+                isOk = false;
+                errorMessage = $"Can't remove \"{key}\" because it doesn't exist.";
             }
-
-            return isOk;
         }
+
+        if (isOk == false) {
+            Logger.Error(errorMessage);
+        }
+
+        return isOk;
     }
 }
