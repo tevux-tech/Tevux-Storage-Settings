@@ -1,36 +1,33 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Text;
-using Utf8Json;
+﻿namespace LightConversion.Storage.Settings;
 
-namespace LightConversion.Storage.Settings {
-    public partial class SettingsProvider {
-        public void Initialize(ReliableFile dataFile) {
-            DataFile = dataFile;
+public partial class SettingsProvider {
+    public void Initialize(ReliableFile dataFile) {
+        DataFile = dataFile;
 
-            if (DataFile.Exists() == false) {
-                Logger.Info($"File \"{DataFile.Path}\" doesn't exist. Creating new empty one.");
-                DataFile.TryWriteAllText("{}");
+        if (DataFile.Exists() == false) {
+            Logger.Info($"File \"{DataFile.Path}\" doesn't exist. Creating new empty one.");
+            DataFile.TryWriteAllText("{}");
+        }
+
+        if (DataFile.TryReadAllBytes(out var fileBytes)) {
+            try {
+                _dataCache = JsonSerializer.Deserialize<Dictionary<string, object>>(fileBytes);
             }
+            catch (JsonParsingException ex) {
+                Logger.Error(ex, $"Deserializing \"{dataFile.Path}\" failed. File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file. File content: {Encoding.UTF8.GetString(fileBytes)}");
 
-            if (DataFile.TryReadAllBytes(out var fileBytes)) {
-                try {
-                    _dataCache = JsonSerializer.Deserialize<Dictionary<string, object>>(fileBytes);
-                } catch (JsonParsingException ex) {
-                    Logger.Error(ex, $"Deserializing \"{dataFile.Path}\" failed. File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file. File content: {Encoding.UTF8.GetString(fileBytes)}");
+                var backupFilePath = DataFile.Path + ".backup";
+                File.Copy(DataFile.Path, backupFilePath, true);
 
-                    var backupFilePath = DataFile.Path + ".backup";
-                    File.Copy(DataFile.Path, backupFilePath, true);
-
-                    DataFile.TryWriteAllText("{}");
-                    _dataCache = new Dictionary<string, object>();
-                }
-            } else {
-                Logger.Error($"Reading from \"{DataFile.Path}\" failed. No settings will be loaded.");
+                DataFile.TryWriteAllText("{}");
                 _dataCache = new Dictionary<string, object>();
             }
-
-            IsInitialized = true;
         }
+        else {
+            Logger.Error($"Reading from \"{DataFile.Path}\" failed. No settings will be loaded.");
+            _dataCache = new Dictionary<string, object>();
+        }
+
+        IsInitialized = true;
     }
 }
