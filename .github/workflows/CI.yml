@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "Versions/*"
+  workflow_dispatch:
 
 jobs:
   build:
@@ -33,8 +34,8 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '5.0.x' # SDK Version to use.
-          source-url: https://nuget.pkg.github.com/light-conversion/index.json
+          dotnet-version: '6.0.x' # SDK Version to use.
+          source-url: https://nuget.pkg.github.com/tevux-tech/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 

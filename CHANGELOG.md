@@ -1,5 +1,10 @@
 # LightConversion.Software.Settings Changelog
 
+## [2.0.0] - 2022-09-23
+### Changed
+- Moving to NET6. No actual changes in functionality.. 
+
+
 ## [1.0.1] - 2022-06-10
 ### Changed
 - No actual changes. Added MIT licence and created github action workflow.
