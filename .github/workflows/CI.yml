@@ -25,12 +25,12 @@ jobs:
       - name: Set tag version
         run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/Versions/}" >> $GITHUB_ENV
 
-      - name: Compare project and tag version
-        run : |
-          if [ "${{env.PROJECT_VERSION}}" != "${{env.TAG_VERSION}}" ]; then
-            echo "Project version ${{env.PROJECT_VERSION}} doesn't match tag version ${{env.TAG_VERSION}}!"
-            exit 1
-          fi
+#      - name: Compare project and tag version
+#        run : |
+#          if [ "${{env.PROJECT_VERSION}}" != "${{env.TAG_VERSION}}" ]; then
+#            echo "Project version ${{env.PROJECT_VERSION}} doesn't match tag version ${{env.TAG_VERSION}}!"
+#            exit 1
+#          fi
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
@@ -43,4 +43,4 @@ jobs:
         run: dotnet build --configuration Release LightConversion.Storage.Settings
 
       - name: Publish the package to GPR
-        run: dotnet nuget push **\*.nupkg -Source 'https://nuget.pkg.github.com/tevux-tech/index.json' -ApiKey ${{secrets.GITHUB_TOKEN}}
+        run: dotnet nuget push **\*.nupkg 
