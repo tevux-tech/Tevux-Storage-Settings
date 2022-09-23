@@ -31,6 +31,7 @@ jobs:
 #            echo "Project version ${{env.PROJECT_VERSION}} doesn't match tag version ${{env.TAG_VERSION}}!"
 #            exit 1
 #          fi
+
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
@@ -43,4 +44,4 @@ jobs:
         run: dotnet build --configuration Release LightConversion.Storage.Settings
 
       - name: Publish the package to GPR
-        run: dotnet nuget push **\*.nupkg --api-key ${{secrets.GITHUB_TOKEN}}
+        run: dotnet nuget push LightConversion.Storage.Settings/bin/Release/*.nupkg
