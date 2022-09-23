@@ -43,6 +43,4 @@ jobs:
         run: dotnet build --configuration Release LightConversion.Storage.Settings
 
       - name: Publish the package to GPR
-        run: dotnet nuget push LightConversion.Storage.Settings/bin/Release/*.nupkg -k ${GITHUB_TOKEN}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet nuget push **\*.nupkg -Source 'https://nuget.pkg.github.com/tevux-tech/index.json' -ApiKey ${{secrets.GITHUB_TOKEN}}
