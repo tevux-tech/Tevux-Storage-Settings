@@ -272,7 +272,7 @@ public class SettingsProviderTests {
         Assert.IsTrue(isOk);
         Assert.AreEqual(loadedFloatSetting, someSetting);
 
-        double someDoubleSetting = 10.0 / 9;
+        var someDoubleSetting = 10.0 / 9;
         settings.TrySet("SomeDoubleNumber", someDoubleSetting);
         isOk = settings.TryGet("SomeDoubleNumber", out float loadedSetting);
         Assert.IsTrue(isOk);
@@ -321,7 +321,7 @@ public class SettingsProviderTests {
         Assert.IsTrue(settings.TryGet("SomeInteger", out int _));
     }
 
-    private void CreateCleanTempFolder() {
+    private static void CreateCleanTempFolder() {
         if (Directory.Exists("temp")) {
             Directory.Delete("temp", true);
         }

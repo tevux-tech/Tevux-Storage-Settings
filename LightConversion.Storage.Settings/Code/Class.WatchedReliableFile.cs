@@ -10,7 +10,7 @@ public class WatchedReliableFile : ReliableFile {
 
     private DateTime _lastWriteDate;
 
-    public event EventHandler Changed;
+    public event EventHandler Changed = delegate { };
     /// <summary>
     /// Initialize ReliableFile and start listening for file changes.
     /// </summary>
@@ -68,7 +68,7 @@ public class WatchedReliableFile : ReliableFile {
         }
 
         if (isChanged) {
-            Changed?.Invoke(this, new EventArgs());
+            Changed.Invoke(this, new EventArgs());
         }
     }
 
@@ -78,7 +78,7 @@ public class WatchedReliableFile : ReliableFile {
         // It's a new file to watch so last write date is current.
         _lastWriteDate = File.GetLastWriteTime(Path);
 
-        Changed?.Invoke(this, new EventArgs());
+        Changed.Invoke(this, new EventArgs());
     }
 
     /// <summary>
