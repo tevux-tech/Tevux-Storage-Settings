@@ -8,7 +8,7 @@
     <Description>Library for reliably storing and loading application settings/data to json file.</Description>
     <Authors>Light Conversion, Tevux Technologies</Authors>
     <Company>Light Conversion</Company>
-    <RepositoryUrl>https://github.com/light-conversion/LightConversion-Storage-Settings</RepositoryUrl>
+    <RepositoryUrl>https://github.com/tevux-tech/LightConversion-Storage-Settings</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
