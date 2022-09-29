@@ -14,8 +14,7 @@ public partial class SettingsProvider {
                 if (isOk == false) {
                     errorMessage = $"Removing setting \"{key}\" failed because writing to file failed.";
                 }
-            }
-            else {
+            } else {
                 isOk = false;
                 errorMessage = $"Can't remove \"{key}\" because it doesn't exist.";
             }

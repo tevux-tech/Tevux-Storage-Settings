@@ -6,17 +6,13 @@ public partial class SettingsProvider {
 
         if (valueToConvert is int valueAsInt) {
             convertedValue = valueAsInt;
-        }
-        else if (valueToConvert is long valueAsLong) {
+        } else if (valueToConvert is long valueAsLong) {
             convertedValue = (int)valueAsLong;
-        }
-        else if (valueToConvert is double valueAsDouble) {
+        } else if (valueToConvert is double valueAsDouble) {
             convertedValue = Convert.ToInt32(valueAsDouble);
-        }
-        else if (valueToConvert is float valueAsFloat) {
+        } else if (valueToConvert is float valueAsFloat) {
             convertedValue = Convert.ToInt32(valueAsFloat);
-        }
-        else {
+        } else {
             convertedValue = 0;
             isOk = false;
         }
@@ -29,17 +25,13 @@ public partial class SettingsProvider {
 
         if (valueToConvert is double valueAsDouble) {
             convertedValue = valueAsDouble;
-        }
-        else if (valueToConvert is float valueAsFloat) {
+        } else if (valueToConvert is float valueAsFloat) {
             convertedValue = valueAsFloat;
-        }
-        else if (valueToConvert is int valueAsInt) {
+        } else if (valueToConvert is int valueAsInt) {
             convertedValue = valueAsInt;
-        }
-        else if (valueToConvert is long valueAsLong) {
+        } else if (valueToConvert is long valueAsLong) {
             convertedValue = valueAsLong;
-        }
-        else {
+        } else {
             convertedValue = 0;
             isOk = false;
         }
@@ -52,17 +44,13 @@ public partial class SettingsProvider {
 
         if (valueToConvert is float valueAsFloat) {
             convertedValue = valueAsFloat;
-        }
-        else if (valueToConvert is double valueAsDouble) {
+        } else if (valueToConvert is double valueAsDouble) {
             convertedValue = (float)valueAsDouble;
-        }
-        else if (valueToConvert is int valueAsInt) {
+        } else if (valueToConvert is int valueAsInt) {
             convertedValue = valueAsInt;
-        }
-        else if (valueToConvert is long valueAsLong) {
+        } else if (valueToConvert is long valueAsLong) {
             convertedValue = valueAsLong;
-        }
-        else {
+        } else {
             convertedValue = 0;
             isOk = false;
         }
@@ -76,8 +64,7 @@ public partial class SettingsProvider {
         if (valueToConvert is bool valueAsBool) {
             isOk = true;
             convertedValue = valueAsBool;
-        }
-        else {
+        } else {
             isOk = false;
             convertedValue = false;
         }
@@ -89,8 +76,7 @@ public partial class SettingsProvider {
         if (valueToConvert is string valueAsString) {
             convertedValue = valueAsString;
             return true;
-        }
-        else {
+        } else {
             convertedValue = "";
             return false;
         }
@@ -101,17 +87,14 @@ public partial class SettingsProvider {
 
         if (valueToConvert is DateTime valueAsDateTime) {
             convertedValue = valueAsDateTime;
-        }
-        else if (valueToConvert is string valueAsString) {
+        } else if (valueToConvert is string valueAsString) {
             try {
                 convertedValue = JsonSerializer.Deserialize<DateTime>($"\"{valueAsString}\"");
-            }
-            catch (Exception) {
+            } catch (Exception) {
                 convertedValue = DateTime.MinValue;
                 isOk = false;
             }
-        }
-        else {
+        } else {
             convertedValue = DateTime.MinValue;
             isOk = false;
         }

@@ -63,8 +63,7 @@ public class ReliableFile {
         // Taking action to fix file, if issues present.
         if (state == FileHealth.Intact) {
             // All good, file structure is intact.
-        }
-        else if (state == FileHealth.Recoverable) {
+        } else if (state == FileHealth.Recoverable) {
             // Something is not right, but rf2 is present, so restoring from it.
             Logger.Warn($"Recovering from \"{_rf2FilePath}\".");
             lock (_lock) {
@@ -72,30 +71,25 @@ public class ReliableFile {
                     File.Delete(Path);
                     File.Delete(_rf1FilePath);
                     File.Move(_rf2FilePath, Path);
-                }
-                catch (IOException ex) {
+                } catch (IOException ex) {
                     Logger.Error(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
                 }
             }
-        }
-        else if (state == FileHealth.Littered) {
+        } else if (state == FileHealth.Littered) {
             // Last write is probably lost, but main file is still there. Just cleaning up.
             Logger.Warn($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
             try {
                 File.Delete(_rf1FilePath);
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 Logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
             }
-        }
-        else if (state == FileHealth.Unrecoverable) {
+        } else if (state == FileHealth.Unrecoverable) {
             // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
             Logger.Error("File is unrecoverable. Probably last saving crashed at some point.");
 
             try {
                 File.Delete(_rf1FilePath);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 Logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
             }
         }
@@ -116,17 +110,14 @@ public class ReliableFile {
                 try {
                     fileContent = File.ReadAllBytes(Path);
                     returnValue = true;
-                }
-                catch (IOException ex) {
+                } catch (IOException ex) {
                     Logger.Error(ex, "Reading file failed because of IOException.");
                     returnValue = false;
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     Logger.Error(ex, "Reading file failed because of general Exception.");
                     returnValue = false;
                 }
-            }
-            else {
+            } else {
                 Logger.Error("Reading file failed because it doesn't exist.");
                 returnValue = false;
             }
@@ -144,8 +135,7 @@ public class ReliableFile {
 
         var isOk = TryReadAllBytes(out var fileBytes);
 
-        if (isOk) { fileContent = Encoding.UTF8.GetString(fileBytes); }
-        else { fileContent = ""; }
+        if (isOk) { fileContent = Encoding.UTF8.GetString(fileBytes); } else { fileContent = ""; }
 
         return isOk;
     }
@@ -164,12 +154,10 @@ public class ReliableFile {
                 File.Delete(Path);
                 File.Move(_rf2FilePath, Path);
                 returnValue = true;
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 Logger.Error(ex, "Writing to file failed because of IOException.");
                 returnValue = false;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 Logger.Error(ex, "Writing to file failed because of general Exception.");
                 returnValue = false;
             }

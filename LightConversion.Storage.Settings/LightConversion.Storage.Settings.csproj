@@ -19,6 +19,10 @@
 
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.7.15" />
+    <PackageReference Include="Tevux.Tools.RepositorySettings" Version="0.1.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Utf8Json" Version="1.3.7" />
   </ItemGroup>
 

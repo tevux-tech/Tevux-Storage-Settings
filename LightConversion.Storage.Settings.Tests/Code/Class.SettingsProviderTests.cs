@@ -142,8 +142,7 @@ public class SettingsProviderTests {
             var settingsFile = new ReliableFile();
             settingsFile.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             Assert.Fail("Initialization shouldn't throw any exceptions", ex);
         }
     }
@@ -184,8 +183,7 @@ public class SettingsProviderTests {
             var settingsFile2 = new ReliableFile();
             settingsFile2.Initialize("temp/someSettings.json");
             settings.Initialize(settingsFile2);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             Assert.Fail("No exception should be thrown", ex);
         }
     }

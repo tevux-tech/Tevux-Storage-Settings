@@ -161,8 +161,7 @@ public class ReliableFileTests {
 
                 isOk = reliableFile.TryWriteAllText("Some text");
                 Assert.IsFalse(isOk, "Must fail because file isn't accessible.");
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 Assert.Fail("No exception should be thrown", ex);
             }
         }
