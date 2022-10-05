@@ -1,5 +1,13 @@
 # LightConversion.Software.Settings Changelog
 
+## [2.0.0] - 2022-09-29
+### Changed
+- Moving to NET6, and applying some modern code style.
+
+### Removed
+- Deleting WatchedReliableFile (and related unit tests), because it serves no purpose and is not reliable at all.
+
+
 ## [1.0.1] - 2022-06-10
 ### Changed
 - No actual changes. Added MIT licence and created github action workflow.

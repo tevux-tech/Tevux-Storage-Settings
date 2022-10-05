@@ -1,27 +1,23 @@
-# == C# ==
+# C# 
 *.cs eol=crlf
 *.xaml.cs eol=crlf
 *.xaml eol=crlf
 
-
-# == C/C++ ==
+# C/C++
 *.h eol=crlf
 *.hpp eol=crlf
 *.c eol=crlf
 *.cpp eol=crlf
 *.cc eol=crlf
 
-
-# == Poweshell ==
+# Powershell
 *.ps1 eol=crlf
 *.psm1 eol=crlf
 
-
-# == Python ==
+# Python
 *.py eol=crlf
 
-
-# == Web/REST stuff ==
+# Web/REST
 *.xml eol=crlf
 *.json eol=crlf
 *.html eol=crlf
@@ -31,8 +27,7 @@
 *.css eol=crlf
 *.vue eol=crlf
 
-
-# == Visual studio stuff ==
+# Visual Studio
 *.csproj eol=crlf
 *.sln eol=crlf
 *.config eol=crlf
@@ -41,14 +36,10 @@
 *.props eol=crlf
 *.filters eol=crlf
 
-
-# == Documentation stuff ==
+# Documentation
 *.csv eol=crlf
 *.md eol=crlf
 *.txt eol=crlf
 
-
-# == Deployment stuff ==
-*.suf eol=crlf
+# Deployment
 *.nuspec eol=crlf
-*.tu2 eol=crlf
