@@ -2,9 +2,6 @@
 using System.IO;
 using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NLog;
-using NLog.Extensions.Logging;
-using NLog.Layouts;
 using NullLogger = Microsoft.Extensions.Logging.Abstractions.NullLogger;
 
 namespace LightConversion.Software.Settings.Tests;

@@ -2,12 +2,7 @@
 using System.IO;
 using LightConversion.Storage.Settings;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Testing.Platform.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NLog;
-using NLog.Extensions.Logging;
-using NLog.Layouts;
-using LogLevel = NLog.LogLevel;
 using NullLogger = Microsoft.Extensions.Logging.Abstractions.NullLogger;
 
 namespace LightConversion.Software.Settings.Tests;
@@ -281,7 +276,7 @@ public class SettingsProviderTests {
         Assert.IsTrue(isOk);
         Assert.AreEqual((float)someDoubleSetting, loadedSetting);
     }
-    
+
     private static void CreateCleanTempFolder() {
         if (Directory.Exists("temp")) {
             Directory.Delete("temp", true);
