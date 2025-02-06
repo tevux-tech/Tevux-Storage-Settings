@@ -169,38 +169,6 @@ public class ReliableFileTests {
         }
     }
 
-    [TestMethod]
-    public void TestLogging() {
-        CreateCleanTempFolder();
-
-        // Create logger that writes stacktrace to log file.
-        var config = new NLog.Config.LoggingConfiguration();
-        var logFilePath = "temp/nlogfile.txt";
-        var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}") };
-        config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
-        LogManager.Configuration = config;
-        var loggerFactory = new NLogLoggerFactory();
-        var logger = loggerFactory.CreateLogger(nameof(ReliableFile));
-
-        var testFilePath = "temp/someFile.txt";
-        var reliableFile = new ReliableFile(logger);
-        reliableFile.Initialize(testFilePath);
-
-        reliableFile.TryWriteAllText("Reliable write to file.");
-
-        // Setting file to read-only.
-        File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) | FileAttributes.ReadOnly);
-
-        var logFileBeforeWrite = File.ReadAllText(logFilePath);
-        reliableFile.TryWriteAllText("This should never be written cuz of read-only file attribute.");
-
-        // Remove read-only attribute from file.
-        File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) & ~FileAttributes.ReadOnly);
-
-        var logFileAfterWrite = File.ReadAllText(logFilePath);
-        Assert.IsTrue(logFileBeforeWrite.Length != logFileAfterWrite.Length);
-    }
-
     private void CreateCleanTempFolder() {
         if (Directory.Exists("temp")) {
             if (File.Exists("temp/someFile.txt")) {

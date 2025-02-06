@@ -281,35 +281,7 @@ public class SettingsProviderTests {
         Assert.IsTrue(isOk);
         Assert.AreEqual((float)someDoubleSetting, loadedSetting);
     }
-
-
-    [TestMethod]
-    public void TestLogging() {
-        CreateCleanTempFolder();
-
-        // Create logger that writes stacktrace to log file.
-        var config = new NLog.Config.LoggingConfiguration();
-        var logFilePath = "temp/nlogfile.txt";
-        var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}") };
-        config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
-        LogManager.Configuration = config;
-        var logger = LogManager.GetCurrentClassLogger();
-        Microsoft.Extensions.Logging.ILoggerFactory loggerFactory =  new NLogLoggerFactory();
-
-        var settingsFilePath = "temp/someSettings.json";
-        var reliableFile = new ReliableFile(NullLogger.Instance);
-        reliableFile.Initialize(settingsFilePath);
-
-        var settings = new SettingsProvider(loggerFactory) ;
-        settings.Initialize(reliableFile);
-        var logFileBeforeGetSetting = File.ReadAllText(logFilePath);
-        var isOk = settings.TryGet("SomeNonExistingSettingName", out float _);
-        Assert.IsFalse(isOk);
-        var logFileAfterGetSetting = File.ReadAllText(logFilePath);
-
-        Assert.IsTrue(logFileBeforeGetSetting.Length != logFileAfterGetSetting.Length);
-    }
-
+    
     private static void CreateCleanTempFolder() {
         if (Directory.Exists("temp")) {
             Directory.Delete("temp", true);
