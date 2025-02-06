@@ -9,7 +9,7 @@ public partial class SettingsProvider {
         }
 
         if (isOk == false) {
-            Logger.Error($"Can't get setting with key \"{key}\" because it doesn't exist.");
+            _logger.LogError($"Can't get setting with key \"{key}\" because it doesn't exist.");
         }
 
         return isOk;

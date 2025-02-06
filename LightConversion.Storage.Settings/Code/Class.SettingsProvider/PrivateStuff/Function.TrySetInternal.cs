@@ -12,7 +12,7 @@ public partial class SettingsProvider {
         }
 
         if (isOk == false) {
-            Logger.Error($"Setting \"{key}\" to {value} failed because writing to file failed.");
+            _logger.LogError($"Setting \"{key}\" to {value} failed because writing to file failed.");
         }
 
         return isOk;

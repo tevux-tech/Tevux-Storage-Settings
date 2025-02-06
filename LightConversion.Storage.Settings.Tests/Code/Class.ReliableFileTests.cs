@@ -3,7 +3,9 @@ using System.IO;
 using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NLog;
+using NLog.Extensions.Logging;
 using NLog.Layouts;
+using NullLogger = Microsoft.Extensions.Logging.Abstractions.NullLogger;
 
 namespace LightConversion.Software.Settings.Tests;
 
@@ -15,7 +17,7 @@ public class ReliableFileTests {
 
         File.WriteAllText("temp/someFile.txt", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -27,7 +29,7 @@ public class ReliableFileTests {
     public void TestBasicWrite() {
         CreateCleanTempFolder();
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryWriteAllText("some text");
@@ -42,7 +44,7 @@ public class ReliableFileTests {
     public void TestReadingNonExistingFile() {
         CreateCleanTempFolder();
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -57,7 +59,7 @@ public class ReliableFileTests {
         // Simulating state when system crashed after first write to rf1.
         File.WriteAllText("temp/someFile.txt.rf1", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -72,7 +74,7 @@ public class ReliableFileTests {
         File.WriteAllText("temp/someFile.txt", "some text");
         File.WriteAllText("temp/someFile.txt.rf1", "new text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -91,7 +93,7 @@ public class ReliableFileTests {
         File.WriteAllText("temp/someFile.txt", "some text");
         File.WriteAllText("temp/someFile.txt.rf2", "new text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -110,7 +112,7 @@ public class ReliableFileTests {
         // Simulating state when system crashed after successfully writing to rf1 and moving it to rf2. 
         File.WriteAllText("temp/someFile.txt.rf2", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -125,7 +127,7 @@ public class ReliableFileTests {
         // Simulating state when system crashed after first write to rf1.
         File.WriteAllText("temp/someFile.txt.rf1", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isRf1StillPresent = File.Exists("temp/someFile.rf1");
@@ -139,7 +141,7 @@ public class ReliableFileTests {
         // Simulating state when system crashed after successfully writing to rf1 and moving it to rf2. 
         File.WriteAllText("temp/someFile.txt.rf2", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isRf2StillPresent = File.Exists("temp/someFile.txt.rf2");
@@ -152,7 +154,7 @@ public class ReliableFileTests {
 
         // Simulating opened file by other program.
         using (var openFileStream = File.Open("temp/someFile.txt", FileMode.OpenOrCreate)) {
-            var reliableFile = new ReliableFile();
+            var reliableFile = new ReliableFile(NullLogger.Instance);
             reliableFile.Initialize("temp/someFile.txt");
 
             try {
@@ -177,10 +179,11 @@ public class ReliableFileTests {
         var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}") };
         config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
         LogManager.Configuration = config;
-        var logger = LogManager.GetCurrentClassLogger();
+        var loggerFactory = new NLogLoggerFactory();
+        var logger = loggerFactory.CreateLogger(nameof(ReliableFile));
 
         var testFilePath = "temp/someFile.txt";
-        var reliableFile = new ReliableFile { Logger = logger };
+        var reliableFile = new ReliableFile(logger);
         reliableFile.Initialize(testFilePath);
 
         reliableFile.TryWriteAllText("Reliable write to file.");

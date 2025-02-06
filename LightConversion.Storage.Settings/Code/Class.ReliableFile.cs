@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging.Abstractions;
+
 namespace LightConversion.Storage.Settings;
 
 /// <summary>
@@ -8,13 +10,17 @@ public class ReliableFile {
     private bool _isInitialized;
     private string _rf1FilePath;
     private string _rf2FilePath;
-    public Logger Logger = LogManager.CreateNullLogger();
+    private readonly ILogger _logger;
 
     public string Path { get; private set; }
 
+    public ReliableFile(ILogger logger) {
+        _logger = logger;
+    }
+    
     public bool Exists() {
         if (_isInitialized == false) {
-            Logger.Error("Object is not initialized or failed to initialize.");
+            _logger.LogError("Object is not initialized or failed to initialize.");
             return false;
         }
 
@@ -66,32 +72,32 @@ public class ReliableFile {
             // All good, file structure is intact.
         } else if (state == FileHealth.Recoverable) {
             // Something is not right, but rf2 is present, so restoring from it.
-            Logger.Warn($"Recovering from \"{_rf2FilePath}\".");
+            _logger.LogWarning($"Recovering from \"{_rf2FilePath}\".");
             lock (_lock) {
                 try {
                     File.Delete(Path);
                     File.Delete(_rf1FilePath);
                     File.Move(_rf2FilePath, Path);
                 } catch (IOException ex) {
-                    Logger.Error(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
+                    _logger.LogError(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
                 }
             }
         } else if (state == FileHealth.Littered) {
             // Last write is probably lost, but main file is still there. Just cleaning up.
-            Logger.Warn($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
+            _logger.LogWarning($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
             try {
                 File.Delete(_rf1FilePath);
             } catch (IOException ex) {
-                Logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
+                _logger.LogError(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
             }
         } else if (state == FileHealth.Unrecoverable) {
             // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
-            Logger.Error("File is unrecoverable. Probably last saving crashed at some point.");
+            _logger.LogError("File is unrecoverable. Probably last saving crashed at some point.");
 
             try {
                 File.Delete(_rf1FilePath);
             } catch (Exception ex) {
-                Logger.Error(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
+                _logger.LogError(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
             }
         }
 
@@ -100,7 +106,7 @@ public class ReliableFile {
 
     public bool TryReadAllBytes(out byte[] fileContent) {
         if (_isInitialized == false) {
-            Logger.Error("Object is not initialized or failed to initialize.");
+            _logger.LogError("Object is not initialized or failed to initialize.");
             fileContent = Array.Empty<byte>();
             return false;
         }
@@ -113,14 +119,14 @@ public class ReliableFile {
                     fileContent = File.ReadAllBytes(Path);
                     returnValue = true;
                 } catch (IOException ex) {
-                    Logger.Error(ex, "Reading file failed because of IOException.");
+                    _logger.LogError(ex, "Reading file failed because of IOException.");
                     returnValue = false;
                 } catch (Exception ex) {
-                    Logger.Error(ex, "Reading file failed because of general Exception.");
+                    _logger.LogError(ex, "Reading file failed because of general Exception.");
                     returnValue = false;
                 }
             } else {
-                Logger.Error("Reading file failed because it doesn't exist.");
+                _logger.LogError("Reading file failed because it doesn't exist.");
                 returnValue = false;
             }
         }
@@ -130,7 +136,7 @@ public class ReliableFile {
 
     public bool TryReadAllText(out string fileContent) {
         if (_isInitialized == false) {
-            Logger.Error("Object is not initialized or failed to initialize.");
+            _logger.LogError("Object is not initialized or failed to initialize.");
             fileContent = "";
             return false;
         }
@@ -144,7 +150,7 @@ public class ReliableFile {
 
     public bool TryWriteAllBytes(byte[] bytesToWrite) {
         if (_isInitialized == false) {
-            Logger.Error("Object is not initialized or failed to initialize.");
+            _logger.LogError("Object is not initialized or failed to initialize.");
             return false;
         }
 
@@ -158,10 +164,10 @@ public class ReliableFile {
                 File.Move(_rf2FilePath, Path);
                 returnValue = true;
             } catch (IOException ex) {
-                Logger.Error(ex, "Writing to file failed because of IOException.");
+                _logger.LogError(ex, "Writing to file failed because of IOException.");
                 returnValue = false;
             } catch (Exception ex) {
-                Logger.Error(ex, "Writing to file failed because of general Exception.");
+                _logger.LogError(ex, "Writing to file failed because of general Exception.");
                 returnValue = false;
             }
         }
@@ -171,7 +177,7 @@ public class ReliableFile {
 
     public bool TryWriteAllText(string textToWrite) {
         if (_isInitialized == false) {
-            Logger.Error("Object is not initialized or failed to initialize.");
+            _logger.LogError("Object is not initialized or failed to initialize.");
             return false;
         }
 

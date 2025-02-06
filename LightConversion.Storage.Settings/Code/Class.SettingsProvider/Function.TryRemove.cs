@@ -21,7 +21,7 @@ public partial class SettingsProvider {
         }
 
         if (isOk == false) {
-            Logger.Error(errorMessage);
+            _logger.LogError(errorMessage);
         }
 
         return isOk;
