@@ -1,23 +1,24 @@
-using Microsoft.Extensions.Logging.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LightConversion.Storage.Settings;
 
 /// <summary>
 /// Class executes file read/write operations reliably. If system fails at write operation original file content will be restored.
 /// </summary>
+[SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Defending against unknown filesystem exception. They are logged, so it is fine.")]
 public class ReliableFile {
     private readonly object _lock = new();
+    private readonly ILogger _logger;
     private bool _isInitialized;
     private string _rf1FilePath;
     private string _rf2FilePath;
-    private readonly ILogger _logger;
-
-    public string Path { get; private set; }
 
     public ReliableFile(ILogger logger) {
         _logger = logger;
     }
-    
+
+    public string Path { get; private set; }
+
     public bool Exists() {
         if (_isInitialized == false) {
             _logger.LogError("Object is not initialized or failed to initialize.");
@@ -30,7 +31,6 @@ public class ReliableFile {
     /// <summary>
     /// Initialize ReliableFile object. Try to recover file if last write operation failed.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown when failed to initialize object.</exception>
     public virtual void Initialize(string filePath) {
         if (_isInitialized) { return; }
 
@@ -38,9 +38,9 @@ public class ReliableFile {
         _rf1FilePath = filePath + ".rf1";
         _rf2FilePath = filePath + ".rf2";
 
-        var mainFileExists = false;
-        var rf1FileExists = false;
-        var rf2FileExists = false;
+        bool mainFileExists;
+        bool rf1FileExists;
+        bool rf2FileExists;
 
         // Checking what is on the disk.
         lock (_lock) {
@@ -68,37 +68,48 @@ public class ReliableFile {
         if (mainFileExists == false && rf1FileExists == true && rf2FileExists == true) { state = FileHealth.Recoverable; }
 
         // Taking action to fix file, if issues present.
-        if (state == FileHealth.Intact) {
-            // All good, file structure is intact.
-        } else if (state == FileHealth.Recoverable) {
-            // Something is not right, but rf2 is present, so restoring from it.
-            _logger.LogWarning($"Recovering from \"{_rf2FilePath}\".");
-            lock (_lock) {
-                try {
-                    File.Delete(Path);
-                    File.Delete(_rf1FilePath);
-                    File.Move(_rf2FilePath, Path);
-                } catch (IOException ex) {
-                    _logger.LogError(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
-                }
-            }
-        } else if (state == FileHealth.Littered) {
-            // Last write is probably lost, but main file is still there. Just cleaning up.
-            _logger.LogWarning($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
-            try {
-                File.Delete(_rf1FilePath);
-            } catch (IOException ex) {
-                _logger.LogError(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
-            }
-        } else if (state == FileHealth.Unrecoverable) {
-            // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
-            _logger.LogError("File is unrecoverable. Probably last saving crashed at some point.");
+        switch (state) {
+            case FileHealth.Intact:
+                // All good, file structure is intact.
+                break;
 
-            try {
-                File.Delete(_rf1FilePath);
-            } catch (Exception ex) {
-                _logger.LogError(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
+            case FileHealth.Recoverable: {
+                // Something is not right, but rf2 is present, so restoring from it.
+                _logger.LogWarning($"Recovering from \"{_rf2FilePath}\".");
+                lock (_lock) {
+                    try {
+                        File.Delete(Path);
+                        File.Delete(_rf1FilePath);
+                        File.Move(_rf2FilePath, Path);
+                    } catch (IOException ex) {
+                        _logger.LogError(ex, $"File recovery from \"{_rf1FilePath}\" failed because of IOException.");
+                    }
+                }
+
+                break;
             }
+            case FileHealth.Littered:
+                // Last write is probably lost, but main file is still there. Just cleaning up.
+                _logger.LogWarning($"Recovering from \"{_rf2FilePath}\". Last write operation is probably lost.");
+                try {
+                    File.Delete(_rf1FilePath);
+                } catch (IOException ex) {
+                    _logger.LogError(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of IOException.");
+                }
+
+                break;
+
+            case FileHealth.Unrecoverable:
+                // rf2 file is missing, probably saving crashed at some point. rf1 file, if present, is probably corrupt. Can't do much here.
+                _logger.LogError("File is unrecoverable. Probably last saving crashed at some point.");
+
+                try {
+                    File.Delete(_rf1FilePath);
+                } catch (Exception ex) {
+                    _logger.LogError(ex, $"Deleting temporary \"{_rf1FilePath}\" leftover failed because of Exception.");
+                }
+
+                break;
         }
 
         _isInitialized = true;
@@ -107,12 +118,12 @@ public class ReliableFile {
     public bool TryReadAllBytes(out byte[] fileContent) {
         if (_isInitialized == false) {
             _logger.LogError("Object is not initialized or failed to initialize.");
-            fileContent = Array.Empty<byte>();
+            fileContent = [];
             return false;
         }
 
         bool returnValue;
-        fileContent = Array.Empty<byte>();
+        fileContent = [];
         lock (_lock) {
             if (File.Exists(Path)) {
                 try {
@@ -143,7 +154,11 @@ public class ReliableFile {
 
         var isOk = TryReadAllBytes(out var fileBytes);
 
-        if (isOk) { fileContent = Encoding.UTF8.GetString(fileBytes); } else { fileContent = ""; }
+        if (isOk) {
+            fileContent = Encoding.UTF8.GetString(fileBytes);
+        } else {
+            fileContent = "";
+        }
 
         return isOk;
     }

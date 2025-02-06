@@ -7,8 +7,8 @@ public partial class SettingsProvider {
 
         lock (_dataLock) {
             if (_dataCache.Remove(key)) {
-                var jsonBytes = Utf8Json.JsonSerializer.Serialize(_dataCache);
-                var prettyJsonBytes = Utf8Json.JsonSerializer.PrettyPrintByteArray(jsonBytes);
+                var jsonBytes = JsonSerializer.Serialize(_dataCache);
+                var prettyJsonBytes = JsonSerializer.PrettyPrintByteArray(jsonBytes);
                 isOk = DataFile.TryWriteAllBytes(prettyJsonBytes);
 
                 if (isOk == false) {

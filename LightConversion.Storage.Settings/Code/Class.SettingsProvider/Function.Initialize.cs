@@ -2,6 +2,8 @@
 
 public partial class SettingsProvider {
     public void Initialize(ReliableFile dataFile) {
+        ArgumentNullException.ThrowIfNull(dataFile);
+
         DataFile = dataFile;
 
         if (DataFile.Exists() == false) {
@@ -19,7 +21,7 @@ public partial class SettingsProvider {
                 File.Copy(DataFile.Path, backupFilePath, true);
 
                 DataFile.TryWriteAllText("{}");
-                _dataCache = new Dictionary<string, object>();
+                _dataCache = [];
             }
         } else {
             _logger.LogError($"Reading from \"{DataFile.Path}\" failed. No settings will be loaded.");
