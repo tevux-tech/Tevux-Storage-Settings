@@ -4,17 +4,11 @@ namespace LightConversion.Storage.Settings;
 /// Class executes file read/write operations reliably. If system fails at write operation original file content will be restored.
 /// </summary>
 public class ReliableFile {
-    public Logger Logger = LogManager.CreateNullLogger();
     private readonly object _lock = new();
     private bool _isInitialized;
     private string _rf1FilePath;
     private string _rf2FilePath;
-    private enum FileHealth {
-        Intact,
-        Recoverable,
-        Littered,
-        Unrecoverable
-    }
+    public Logger Logger = LogManager.CreateNullLogger();
 
     public string Path { get; private set; }
 
@@ -51,14 +45,21 @@ public class ReliableFile {
 
         // Assessing situation, depending on files present.
         var state = FileHealth.Intact;
-        if ((mainFileExists == true) && (rf1FileExists == false) && (rf2FileExists == false)) { state = FileHealth.Intact; }
-        if ((mainFileExists == true) && (rf1FileExists == false) && (rf2FileExists == true)) { state = FileHealth.Recoverable; }
-        if ((mainFileExists == true) && (rf1FileExists == true) && (rf2FileExists == false)) { state = FileHealth.Littered; }
-        if ((mainFileExists == true) && (rf1FileExists == true) && (rf2FileExists == true)) { state = FileHealth.Recoverable; }
-        if ((mainFileExists == false) && (rf1FileExists == false) && (rf2FileExists == false)) { state = FileHealth.Unrecoverable; }
-        if ((mainFileExists == false) && (rf1FileExists == false) && (rf2FileExists == true)) { state = FileHealth.Recoverable; }
-        if ((mainFileExists == false) && (rf1FileExists == true) && (rf2FileExists == false)) { state = FileHealth.Unrecoverable; }
-        if ((mainFileExists == false) && (rf1FileExists == true) && (rf2FileExists == true)) { state = FileHealth.Recoverable; }
+        if (mainFileExists == true && rf1FileExists == false && rf2FileExists == false) { state = FileHealth.Intact; }
+
+        if (mainFileExists == true && rf1FileExists == false && rf2FileExists == true) { state = FileHealth.Recoverable; }
+
+        if (mainFileExists == true && rf1FileExists == true && rf2FileExists == false) { state = FileHealth.Littered; }
+
+        if (mainFileExists == true && rf1FileExists == true && rf2FileExists == true) { state = FileHealth.Recoverable; }
+
+        if (mainFileExists == false && rf1FileExists == false && rf2FileExists == false) { state = FileHealth.Unrecoverable; }
+
+        if (mainFileExists == false && rf1FileExists == false && rf2FileExists == true) { state = FileHealth.Recoverable; }
+
+        if (mainFileExists == false && rf1FileExists == true && rf2FileExists == false) { state = FileHealth.Unrecoverable; }
+
+        if (mainFileExists == false && rf1FileExists == true && rf2FileExists == true) { state = FileHealth.Recoverable; }
 
         // Taking action to fix file, if issues present.
         if (state == FileHealth.Intact) {
@@ -96,6 +97,7 @@ public class ReliableFile {
 
         _isInitialized = true;
     }
+
     public bool TryReadAllBytes(out byte[] fileContent) {
         if (_isInitialized == false) {
             Logger.Error("Object is not initialized or failed to initialize.");
@@ -139,6 +141,7 @@ public class ReliableFile {
 
         return isOk;
     }
+
     public bool TryWriteAllBytes(byte[] bytesToWrite) {
         if (_isInitialized == false) {
             Logger.Error("Object is not initialized or failed to initialize.");
@@ -173,5 +176,12 @@ public class ReliableFile {
         }
 
         return TryWriteAllBytes(Encoding.UTF8.GetBytes(textToWrite));
+    }
+
+    private enum FileHealth {
+        Intact,
+        Recoverable,
+        Littered,
+        Unrecoverable
     }
 }
