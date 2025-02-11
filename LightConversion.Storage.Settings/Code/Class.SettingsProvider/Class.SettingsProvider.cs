@@ -1,9 +1,0 @@
-﻿namespace LightConversion.Storage.Settings;
-
-public partial class SettingsProvider {
-    private Dictionary<string, object> _dataCache;
-    private readonly object _dataLock = new();
-    public Logger Logger = LogManager.CreateNullLogger();
-    public ReliableFile DataFile { get; private set; }
-    public bool IsInitialized { get; private set; }
-}

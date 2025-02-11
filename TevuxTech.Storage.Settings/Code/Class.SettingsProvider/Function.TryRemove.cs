@@ -1,4 +1,4 @@
-﻿namespace LightConversion.Storage.Settings;
+﻿namespace TevuxTech.Storage.Settings;
 
 public partial class SettingsProvider {
     public bool TryRemove(string key) {
@@ -7,22 +7,21 @@ public partial class SettingsProvider {
 
         lock (_dataLock) {
             if (_dataCache.Remove(key)) {
-                var jsonBytes = Utf8Json.JsonSerializer.Serialize(_dataCache);
-                var prettyJsonBytes = Utf8Json.JsonSerializer.PrettyPrintByteArray(jsonBytes);
+                var jsonBytes = JsonSerializer.Serialize(_dataCache);
+                var prettyJsonBytes = JsonSerializer.PrettyPrintByteArray(jsonBytes);
                 isOk = DataFile.TryWriteAllBytes(prettyJsonBytes);
 
                 if (isOk == false) {
                     errorMessage = $"Removing setting \"{key}\" failed because writing to file failed.";
                 }
-            }
-            else {
+            } else {
                 isOk = false;
                 errorMessage = $"Can't remove \"{key}\" because it doesn't exist.";
             }
         }
 
         if (isOk == false) {
-            Logger.Error(errorMessage);
+            _logger.LogError(errorMessage);
         }
 
         return isOk;

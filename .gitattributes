@@ -1,27 +1,25 @@
-# == C# ==
+# devbotas gitattributes 1.0
+
+# C# 
 *.cs eol=crlf
 *.xaml.cs eol=crlf
 *.xaml eol=crlf
 
-
-# == C/C++ ==
+# C/C++
 *.h eol=crlf
 *.hpp eol=crlf
 *.c eol=crlf
 *.cpp eol=crlf
 *.cc eol=crlf
 
-
-# == Poweshell ==
+# Powershell
 *.ps1 eol=crlf
 *.psm1 eol=crlf
 
-
-# == Python ==
+# Python
 *.py eol=crlf
 
-
-# == Web/REST stuff ==
+# Web/REST
 *.xml eol=crlf
 *.json eol=crlf
 *.html eol=crlf
@@ -31,8 +29,7 @@
 *.css eol=crlf
 *.vue eol=crlf
 
-
-# == Visual studio stuff ==
+# Visual Studio
 *.csproj eol=crlf
 *.sln eol=crlf
 *.config eol=crlf
@@ -40,15 +37,36 @@
 *.vgdbsettings eol=crlf
 *.props eol=crlf
 *.filters eol=crlf
+*.DotSettings eol=crlf
 
-
-# == Documentation stuff ==
+# Documentation
 *.csv eol=crlf
 *.md eol=crlf
 *.txt eol=crlf
 
-
-# == Deployment stuff ==
+# Deployment
 *.suf eol=crlf
-*.nuspec eol=crlf
 *.tu2 eol=crlf
+*.nuspec eol=crlf
+
+# Docker
+.dockerignore eol=crlf
+Dockerfile eol=crlf
+Dockerfile-* eol=crlf
+   
+# LC stuff
+*.regdefs eol=crlf
+
+# Avalonia
+*.axaml eol=crlf
+
+# . files
+.editorconfig eol=crlf
+.gitattributes eol=crlf
+.gitignore eol=crlf
+.XamlStyler eol=crlf
+
+# shell
+*.sh eol=crlf
+*.cmd eol=crlf
+*.bat eol=crlf
