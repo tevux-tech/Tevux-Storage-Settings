@@ -2,16 +2,19 @@
 
 public partial class SettingsProvider {
     private bool TryGetInternal(string key, out object value) {
-        bool isOk;
-
         lock (_dataLock) {
-            isOk = _dataCache.TryGetValue(key, out value);
+            if (_dataCache.TryGetValue(key, out var candidateValue)) {
+                value = candidateValue;
+            } else {
+                _logger.LogError($"Can't get setting with key \"{key}\" because it doesn't exist.");
+                goto error;
+            }
         }
 
-        if (isOk == false) {
-            _logger.LogError($"Can't get setting with key \"{key}\" because it doesn't exist.");
-        }
+        return true;
 
-        return isOk;
+        error:
+        value = new object();
+        return false;
     }
 }

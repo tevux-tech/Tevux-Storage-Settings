@@ -8,6 +8,7 @@
     <Authors>Light Conversion, Tevux Technologies</Authors>
     <Company>Light Conversion</Company>
     <RepositoryUrl>https://github.com/light-conversion/LightConversion-Storage-Settings</RepositoryUrl>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

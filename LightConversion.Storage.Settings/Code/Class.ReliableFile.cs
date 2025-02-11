@@ -32,6 +32,9 @@ public class ReliableFile {
     /// Initialize ReliableFile object. Try to recover file if last write operation failed.
     /// </summary>
     public virtual void Initialize(string filePath) {
+        ArgumentNullException.ThrowIfNull(filePath);
+        ArgumentOutOfRangeException.ThrowIfEqual(filePath, "");
+
         if (_isInitialized) { return; }
 
         Path = filePath;

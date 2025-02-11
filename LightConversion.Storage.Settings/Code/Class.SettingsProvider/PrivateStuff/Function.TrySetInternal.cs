@@ -2,6 +2,11 @@ namespace LightConversion.Storage.Settings;
 
 public partial class SettingsProvider {
     private bool TrySetInternal<T>(string key, T value) {
+        if (value is null) {
+            _logger.LogError($"Setting \"{key}\" to null is not a good idea.");
+            goto error;
+        }
+
         bool isOk;
 
         lock (_dataLock) {
@@ -13,8 +18,12 @@ public partial class SettingsProvider {
 
         if (isOk == false) {
             _logger.LogError($"Setting \"{key}\" to {value} failed because writing to file failed.");
+            goto error;
         }
 
         return isOk;
+
+        error:
+        return false;
     }
 }
