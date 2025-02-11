@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NullLogger = Microsoft.Extensions.Logging.Abstractions.NullLogger;
 
-namespace TevuxTech.Software.Settings.Tests;
+namespace TevuxTech.Storage.Settings;
 
 [TestClass]
 public class ReliableFileTests {

@@ -10,7 +10,6 @@ public class ReliableFile {
     private bool _isInitialized;
     private string _rf1FilePath;
     private string _rf2FilePath;
-    public Logger Logger = LogManager.CreateNullLogger();
 
     public ReliableFile(ILogger logger) {
         _logger = logger;
