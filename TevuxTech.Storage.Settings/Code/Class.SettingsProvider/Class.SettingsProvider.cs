@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace LightConversion.Storage.Settings;
+namespace TevuxTech.Storage.Settings;
 
 [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Defending against unknown filesystem exception. They are logged, so it is fine.")]
 public partial class SettingsProvider {

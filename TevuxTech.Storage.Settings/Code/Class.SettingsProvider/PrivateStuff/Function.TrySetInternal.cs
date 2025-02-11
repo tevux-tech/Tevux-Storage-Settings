@@ -1,4 +1,4 @@
-namespace LightConversion.Storage.Settings;
+namespace TevuxTech.Storage.Settings;
 
 public partial class SettingsProvider {
     private bool TrySetInternal<T>(string key, T value) {

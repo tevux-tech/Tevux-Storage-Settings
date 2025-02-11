@@ -1,4 +1,4 @@
-# LightConversion-Software-Settings
+# TevuxTech-Software-Settings
 
 For many years, we've been using `File.WriteAllText` and `File.ReadAllText` methods to store program settings in file.
 However, every once in a while, when debugging client's broken systems, we find settings file completely empty. It is a

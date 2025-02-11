@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
-using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NullLogger = Microsoft.Extensions.Logging.Abstractions.NullLogger;
 
-namespace LightConversion.Software.Settings.Tests;
+namespace TevuxTech.Software.Settings.Tests;
 
 [TestClass]
 public class ReliableFileTests {
@@ -169,7 +168,8 @@ public class ReliableFileTests {
     private void CreateCleanTempFolder() {
         if (Directory.Exists("temp")) {
             if (File.Exists("temp/someFile.txt")) {
-                File.SetAttributes("temp/someFile.txt", File.GetAttributes("temp/someFile.txt") & ~FileAttributes.ReadOnly);
+                File.SetAttributes("temp/someFile.txt",
+                    File.GetAttributes("temp/someFile.txt") & ~FileAttributes.ReadOnly);
             }
 
             Directory.Delete("temp", true);

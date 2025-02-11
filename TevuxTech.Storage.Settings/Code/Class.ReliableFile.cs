@@ -1,6 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace LightConversion.Storage.Settings;
+namespace TevuxTech.Storage.Settings;
 
 /// <summary>
 /// Class executes file read/write operations reliably. If system fails at write operation original file content will be restored.
@@ -12,6 +10,7 @@ public class ReliableFile {
     private bool _isInitialized;
     private string _rf1FilePath;
     private string _rf2FilePath;
+    public Logger Logger = LogManager.CreateNullLogger();
 
     public ReliableFile(ILogger logger) {
         _logger = logger;

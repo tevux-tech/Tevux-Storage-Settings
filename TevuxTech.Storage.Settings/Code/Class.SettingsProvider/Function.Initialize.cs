@@ -1,4 +1,4 @@
-﻿namespace LightConversion.Storage.Settings;
+namespace TevuxTech.Storage.Settings;
 
 public partial class SettingsProvider {
     public void Initialize(ReliableFile dataFile) {

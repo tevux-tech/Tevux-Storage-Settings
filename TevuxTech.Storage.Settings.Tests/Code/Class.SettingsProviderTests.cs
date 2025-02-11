@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.IO;
 using LightConversion.Storage.Settings;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NullLogger = Microsoft.Extensions.Logging.Abstractions.NullLogger;
 
-namespace LightConversion.Software.Settings.Tests;
+namespace TevuxTech.Software.Settings.Tests;
 
 [TestClass]
 public class SettingsProviderTests {
