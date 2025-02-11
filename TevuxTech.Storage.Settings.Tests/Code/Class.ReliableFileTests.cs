@@ -1,11 +1,9 @@
-﻿using System;
+using System;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NLog;
-using NLog.Layouts;
-using TevuxTech.Storage.Settings;
+using NullLogger = Microsoft.Extensions.Logging.Abstractions.NullLogger;
 
-namespace TevuxTech.Software.Settings.Tests;
+namespace TevuxTech.Storage.Settings;
 
 [TestClass]
 public class ReliableFileTests {
@@ -15,7 +13,7 @@ public class ReliableFileTests {
 
         File.WriteAllText("temp/someFile.txt", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -27,7 +25,7 @@ public class ReliableFileTests {
     public void TestBasicWrite() {
         CreateCleanTempFolder();
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryWriteAllText("some text");
@@ -42,7 +40,7 @@ public class ReliableFileTests {
     public void TestReadingNonExistingFile() {
         CreateCleanTempFolder();
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -57,7 +55,7 @@ public class ReliableFileTests {
         // Simulating state when system crashed after first write to rf1.
         File.WriteAllText("temp/someFile.txt.rf1", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -72,7 +70,7 @@ public class ReliableFileTests {
         File.WriteAllText("temp/someFile.txt", "some text");
         File.WriteAllText("temp/someFile.txt.rf1", "new text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -91,7 +89,7 @@ public class ReliableFileTests {
         File.WriteAllText("temp/someFile.txt", "some text");
         File.WriteAllText("temp/someFile.txt.rf2", "new text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -110,7 +108,7 @@ public class ReliableFileTests {
         // Simulating state when system crashed after successfully writing to rf1 and moving it to rf2. 
         File.WriteAllText("temp/someFile.txt.rf2", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isOk = reliableFile.TryReadAllText(out var fileContent);
@@ -125,7 +123,7 @@ public class ReliableFileTests {
         // Simulating state when system crashed after first write to rf1.
         File.WriteAllText("temp/someFile.txt.rf1", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isRf1StillPresent = File.Exists("temp/someFile.rf1");
@@ -139,7 +137,7 @@ public class ReliableFileTests {
         // Simulating state when system crashed after successfully writing to rf1 and moving it to rf2. 
         File.WriteAllText("temp/someFile.txt.rf2", "some text");
 
-        var reliableFile = new ReliableFile();
+        var reliableFile = new ReliableFile(NullLogger.Instance);
         reliableFile.Initialize("temp/someFile.txt");
 
         var isRf2StillPresent = File.Exists("temp/someFile.txt.rf2");
@@ -152,7 +150,7 @@ public class ReliableFileTests {
 
         // Simulating opened file by other program.
         using (var openFileStream = File.Open("temp/someFile.txt", FileMode.OpenOrCreate)) {
-            var reliableFile = new ReliableFile();
+            var reliableFile = new ReliableFile(NullLogger.Instance);
             reliableFile.Initialize("temp/someFile.txt");
 
             try {
@@ -165,39 +163,6 @@ public class ReliableFileTests {
                 Assert.Fail("No exception should be thrown", ex);
             }
         }
-    }
-
-    [TestMethod]
-    public void TestLogging() {
-        CreateCleanTempFolder();
-
-        // Create logger that writes stacktrace to log file.
-        var config = new NLog.Config.LoggingConfiguration();
-        var logFilePath = "temp/nlogfile.txt";
-        var logfile = new NLog.Targets.FileTarget("logfile") {
-            FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}")
-        };
-        config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
-        LogManager.Configuration = config;
-        var logger = LogManager.GetCurrentClassLogger();
-
-        var testFilePath = "temp/someFile.txt";
-        var reliableFile = new ReliableFile { Logger = logger };
-        reliableFile.Initialize(testFilePath);
-
-        reliableFile.TryWriteAllText("Reliable write to file.");
-
-        // Setting file to read-only.
-        File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) | FileAttributes.ReadOnly);
-
-        var logFileBeforeWrite = File.ReadAllText(logFilePath);
-        reliableFile.TryWriteAllText("This should never be written cuz of read-only file attribute.");
-
-        // Remove read-only attribute from file.
-        File.SetAttributes(testFilePath, File.GetAttributes(testFilePath) & ~FileAttributes.ReadOnly);
-
-        var logFileAfterWrite = File.ReadAllText(logFilePath);
-        Assert.IsTrue(logFileBeforeWrite.Length != logFileAfterWrite.Length);
     }
 
     private void CreateCleanTempFolder() {
