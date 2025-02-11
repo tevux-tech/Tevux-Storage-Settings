@@ -25,7 +25,7 @@ public partial class SettingsProvider {
             }
         } else {
             _logger.LogError($"Reading from \"{DataFile.Path}\" failed. No settings will be loaded.");
-            _dataCache = new Dictionary<string, object>();
+            _dataCache = [];
         }
 
         IsInitialized = true;

@@ -7,21 +7,17 @@ public partial class SettingsProvider {
             goto error;
         }
 
-        bool isOk;
-
         lock (_dataLock) {
             _dataCache[key] = value;
             var jsonBytes = JsonSerializer.Serialize(_dataCache);
             var prettyJsonBytes = JsonSerializer.PrettyPrintByteArray(jsonBytes);
-            isOk = DataFile.TryWriteAllBytes(prettyJsonBytes);
+            if (DataFile.TryWriteAllBytes(prettyJsonBytes) == false) {
+                _logger.LogError($"Setting \"{key}\" to {value} failed because writing to file failed.");
+                goto error;
+            }
         }
 
-        if (isOk == false) {
-            _logger.LogError($"Setting \"{key}\" to {value} failed because writing to file failed.");
-            goto error;
-        }
-
-        return isOk;
+        return true;
 
         error:
         return false;

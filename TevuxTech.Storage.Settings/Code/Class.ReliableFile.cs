@@ -29,7 +29,7 @@ public class ReliableFile {
     /// <summary>
     /// Initialize ReliableFile object. Try to recover file if last write operation failed.
     /// </summary>
-    public virtual void Initialize(string filePath) {
+    public void Initialize(string filePath) {
         ArgumentNullException.ThrowIfNull(filePath);
         ArgumentOutOfRangeException.ThrowIfEqual(filePath, "");
 
@@ -39,34 +39,38 @@ public class ReliableFile {
         _rf1FilePath = filePath + ".rf1";
         _rf2FilePath = filePath + ".rf2";
 
-        bool mainFileExists;
-        bool rf1FileExists;
-        bool rf2FileExists;
+        bool mainFileIsPresent;
+        bool rf1FileIsPresent;
+        bool rf2FileIsPresent;
 
         // Checking what is on the disk.
         lock (_lock) {
-            mainFileExists = File.Exists(Path);
-            rf1FileExists = File.Exists(_rf1FilePath);
-            rf2FileExists = File.Exists(_rf2FilePath);
+            mainFileIsPresent = File.Exists(Path);
+            rf1FileIsPresent = File.Exists(_rf1FilePath);
+            rf2FileIsPresent = File.Exists(_rf2FilePath);
         }
+
+        var mainFileIsMissing = !mainFileIsPresent;
+        var rf1FileIsMissing = !rf1FileIsPresent;
+        var rf2FileIsMissing = !rf2FileIsPresent;
 
         // Assessing situation, depending on files present.
         var state = FileHealth.Intact;
-        if (mainFileExists == true && rf1FileExists == false && rf2FileExists == false) { state = FileHealth.Intact; }
+        if (mainFileIsPresent && rf1FileIsMissing && rf2FileIsMissing) { state = FileHealth.Intact; }
 
-        if (mainFileExists == true && rf1FileExists == false && rf2FileExists == true) { state = FileHealth.Recoverable; }
+        if (mainFileIsPresent && rf1FileIsMissing && rf2FileIsPresent) { state = FileHealth.Recoverable; }
 
-        if (mainFileExists == true && rf1FileExists == true && rf2FileExists == false) { state = FileHealth.Littered; }
+        if (mainFileIsPresent && rf1FileIsPresent && rf2FileIsMissing) { state = FileHealth.Littered; }
 
-        if (mainFileExists == true && rf1FileExists == true && rf2FileExists == true) { state = FileHealth.Recoverable; }
+        if (mainFileIsPresent && rf1FileIsPresent && rf2FileIsPresent) { state = FileHealth.Recoverable; }
 
-        if (mainFileExists == false && rf1FileExists == false && rf2FileExists == false) { state = FileHealth.Unrecoverable; }
+        if (mainFileIsMissing && rf1FileIsMissing && rf2FileIsMissing) { state = FileHealth.Unrecoverable; }
 
-        if (mainFileExists == false && rf1FileExists == false && rf2FileExists == true) { state = FileHealth.Recoverable; }
+        if (mainFileIsMissing && rf1FileIsMissing && rf2FileIsPresent) { state = FileHealth.Recoverable; }
 
-        if (mainFileExists == false && rf1FileExists == true && rf2FileExists == false) { state = FileHealth.Unrecoverable; }
+        if (mainFileIsMissing && rf1FileIsPresent && rf2FileIsMissing) { state = FileHealth.Unrecoverable; }
 
-        if (mainFileExists == false && rf1FileExists == true && rf2FileExists == true) { state = FileHealth.Recoverable; }
+        if (mainFileIsMissing && rf1FileIsPresent && rf2FileIsPresent) { state = FileHealth.Recoverable; }
 
         // Taking action to fix file, if issues present.
         switch (state) {
