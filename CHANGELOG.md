@@ -1,4 +1,9 @@
-# LightConversion.Software.Settings Changelog
+# TevuxTech.Software.Settings Changelog
+
+## [2.0.1] - 2025-02-11
+### Changed
+- No functional changes, just optimizations.
+
 
 ## [2.0.0] - 2022-09-29
 ### Changed
