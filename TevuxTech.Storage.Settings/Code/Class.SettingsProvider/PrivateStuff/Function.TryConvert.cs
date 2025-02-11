@@ -1,4 +1,4 @@
-﻿namespace LightConversion.Storage.Settings;
+﻿namespace TevuxTech.Storage.Settings;
 
 public partial class SettingsProvider {
     private bool TryConvert(object valueToConvert, out int convertedValue) {

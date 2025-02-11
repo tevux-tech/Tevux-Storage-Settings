@@ -1,4 +1,4 @@
-﻿namespace LightConversion.Storage.Settings;
+﻿namespace TevuxTech.Storage.Settings;
 
 public partial class SettingsProvider {
     public void Initialize(ReliableFile dataFile) {
@@ -13,7 +13,8 @@ public partial class SettingsProvider {
             try {
                 _dataCache = JsonSerializer.Deserialize<Dictionary<string, object>>(fileBytes);
             } catch (JsonParsingException ex) {
-                Logger.Error(ex, $"Deserializing \"{dataFile.Path}\" failed. File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file. File content: {Encoding.UTF8.GetString(fileBytes)}");
+                Logger.Error(ex,
+                    $"Deserializing \"{dataFile.Path}\" failed. File was probably modified manually to invalid json. Creating backup of it and recreating empty setting file. File content: {Encoding.UTF8.GetString(fileBytes)}");
 
                 var backupFilePath = DataFile.Path + ".backup";
                 File.Copy(DataFile.Path, backupFilePath, true);

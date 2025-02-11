@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NLog;
 using NLog.Layouts;
+using TevuxTech.Storage.Settings;
 
-namespace LightConversion.Software.Settings.Tests;
+namespace TevuxTech.Software.Settings.Tests;
 
 [TestClass]
 public class SettingsProviderTests {
@@ -285,7 +285,9 @@ public class SettingsProviderTests {
         // Create logger that writes stacktrace to log file.
         var config = new NLog.Config.LoggingConfiguration();
         var logFilePath = "temp/nlogfile.txt";
-        var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}") };
+        var logfile = new NLog.Targets.FileTarget("logfile") {
+            FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}")
+        };
         config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
         LogManager.Configuration = config;
         var logger = LogManager.GetCurrentClassLogger();

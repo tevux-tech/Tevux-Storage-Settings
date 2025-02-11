@@ -1,4 +1,4 @@
-# LightConversion-Software-Settings
+# TevuxTech-Software-Settings
 
 For many years, we've been using `File.WriteAllText` and `File.ReadAllText` methods to store program settings in file. However, every once in a while, when debugging client's broken systems, we find settings file completely empty. It is a complete mystery of why this happens, but it happens nevertheless and thus we decided to build a reliable multi-stage write process that at least guarantees us a valid settings file. Sure, if the power is cut during the write, newest changes will be lost, but then at least original file will be restored automatically.
 

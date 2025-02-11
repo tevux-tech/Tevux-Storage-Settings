@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using LightConversion.Storage.Settings;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NLog;
 using NLog.Layouts;
+using TevuxTech.Storage.Settings;
 
-namespace LightConversion.Software.Settings.Tests;
+namespace TevuxTech.Software.Settings.Tests;
 
 [TestClass]
 public class ReliableFileTests {
@@ -174,7 +174,9 @@ public class ReliableFileTests {
         // Create logger that writes stacktrace to log file.
         var config = new NLog.Config.LoggingConfiguration();
         var logFilePath = "temp/nlogfile.txt";
-        var logfile = new NLog.Targets.FileTarget("logfile") { FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}") };
+        var logfile = new NLog.Targets.FileTarget("logfile") {
+            FileName = logFilePath, Layout = Layout.FromString("${message} ${exception:format=ToString}")
+        };
         config.AddRule(LogLevel.Debug, LogLevel.Fatal, logfile);
         LogManager.Configuration = config;
         var logger = LogManager.GetCurrentClassLogger();
@@ -201,7 +203,8 @@ public class ReliableFileTests {
     private void CreateCleanTempFolder() {
         if (Directory.Exists("temp")) {
             if (File.Exists("temp/someFile.txt")) {
-                File.SetAttributes("temp/someFile.txt", File.GetAttributes("temp/someFile.txt") & ~FileAttributes.ReadOnly);
+                File.SetAttributes("temp/someFile.txt",
+                    File.GetAttributes("temp/someFile.txt") & ~FileAttributes.ReadOnly);
             }
 
             Directory.Delete("temp", true);

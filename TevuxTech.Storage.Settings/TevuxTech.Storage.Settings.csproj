@@ -3,11 +3,12 @@
     <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Version>2.0.0</Version>
-    <Copyright>Copyright © 2022 Light Conversion, UAB</Copyright>
+    <Copyright>Copyright © 2025 Tevux Technologies</Copyright>
     <Description>Library for reliably storing and loading application settings/data to JSON file.</Description>
-    <Authors>Light Conversion, Tevux Technologies</Authors>
-    <Company>Light Conversion</Company>
-    <RepositoryUrl>https://github.com/light-conversion/LightConversion-Storage-Settings</RepositoryUrl>
+    <Authors>Tevux Technologies</Authors>
+    <Company>Tevux Technologies</Company>
+    <RepositoryUrl>https://github.com/tevux-tech/TevuxTech-Storage-Settings</RepositoryUrl>
+    <RootNamespace>TevuxTech.Storage.Settings</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
