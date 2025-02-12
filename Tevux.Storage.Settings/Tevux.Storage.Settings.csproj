@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <Copyright>Copyright © 2025 Tevux Technologies</Copyright>
     <Description>Library for reliably storing and loading application settings/data to JSON file.</Description>
     <Authors>Tevux Technologies</Authors>
