@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -46,11 +46,5 @@ jobs:
       - name: Publish the package to GPR
         run: dotnet nuget push Tevux.Storage.Settings/bin/Release/*.nupkg
 
-      - name: Setup NuGet
-        uses: nuget/setup-nuget@v2
-        with:
-          nuget-api-key: ${{ secrets.NUGET_API_KEY }}
-          nuget-version: '5.x'
-
       - name: Publish the package to nuget.org
-        run:  nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json'
+        run:  dotnet nuget push **\*.nupkg --source 'https://api.nuget.org/v3/index.json' --api-key ${{ secrets.NUGET_API_KEY }}
