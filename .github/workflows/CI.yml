@@ -25,17 +25,17 @@ jobs:
       - name: Set tag version
         run: echo "TAG_VERSION=${GITHUB_REF#refs/tags/Versions/}" >> $GITHUB_ENV
 
-#      - name: Compare project and tag version
-#        run : |
-#          if [ "${{env.PROJECT_VERSION}}" != "${{env.TAG_VERSION}}" ]; then
-#            echo "Project version ${{env.PROJECT_VERSION}} doesn't match tag version ${{env.TAG_VERSION}}!"
-#            exit 1
-#          fi
+      - name: Compare project and tag version
+        run : |
+          if [ "${{env.PROJECT_VERSION}}" != "${{env.TAG_VERSION}}" ]; then
+            echo "Project version ${{env.PROJECT_VERSION}} doesn't match tag version ${{env.TAG_VERSION}}!"
+            exit 1
+          fi
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '8.0.x' # SDK Version to use.
+          dotnet-version: '8.0.x' 
           source-url: https://nuget.pkg.github.com/tevux-tech/index.json
         env:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -45,3 +45,6 @@ jobs:
 
       - name: Publish the package to GPR
         run: dotnet nuget push TevuxTech.Storage.Settings/bin/Release/*.nupkg
+
+      - name: Publish the package to nuget.org
+        run: run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
