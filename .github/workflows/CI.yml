@@ -17,7 +17,7 @@ jobs:
         id: get_version
         uses: greenygh0st/net-proj-release-version@v2
         with:
-          PROJ_FILE: TevuxTech.Storage.Settings/TevuxTech.Storage.Settings.csproj
+          PROJ_FILE: Tevux.Storage.Settings/Tevux.Storage.Settings.csproj
 
       - name: Set project version
         run: echo "PROJECT_VERSION=${{steps.get_version.outputs.RELEASE_VERSION}}" >> $GITHUB_ENV
@@ -41,10 +41,10 @@ jobs:
           NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Build
-        run: dotnet build --configuration Release TevuxTech.Storage.Settings
+        run: dotnet build --configuration Release Tevux.Storage.Settings
 
       - name: Publish the package to GPR
-        run: dotnet nuget push TevuxTech.Storage.Settings/bin/Release/*.nupkg
+        run: dotnet nuget push Tevux.Storage.Settings/bin/Release/*.nupkg
 
       - name: Publish the package to nuget.org
         run:  nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
