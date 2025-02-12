@@ -1,11 +1,6 @@
-# TevuxTech.Software.Settings Changelog
+# Tevux.Software.Settings Changelog
 
-## [2.0.2] - 2025-02-12
-### Changed
-- No functional changes, just optimizations.
-
-
-## [2.0.1] - 2025-02-11
+## [2.1.0] - 2025-02-12
 ### Changed
 - No functional changes, just optimizations.
 
