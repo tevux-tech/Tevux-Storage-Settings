@@ -8,6 +8,27 @@ namespace TevuxTech.Storage.Settings;
 [TestClass]
 public class ReliableFileTests {
     [TestMethod]
+    public void TestAlreadyOpenFile() {
+        CreateCleanTempFolder();
+
+        // Simulating opened file by other program.
+        using (var openFileStream = File.Open("temp/someFile.txt", FileMode.OpenOrCreate)) {
+            var reliableFile = new ReliableFile(NullLogger.Instance);
+            reliableFile.Initialize("temp/someFile.txt");
+
+            try {
+                var isOk = reliableFile.TryReadAllText(out var fileContent);
+                Assert.IsFalse(isOk, "Must fail because file isn't accessible.");
+
+                isOk = reliableFile.TryWriteAllText("Some text");
+                Assert.IsFalse(isOk, "Must fail because file isn't accessible.");
+            } catch (Exception ex) {
+                Assert.Fail("No exception should be thrown", ex);
+            }
+        }
+    }
+
+    [TestMethod]
     public void TestBasicRead() {
         CreateCleanTempFolder();
 
@@ -33,33 +54,6 @@ public class ReliableFileTests {
 
         var actualContents = File.ReadAllText("temp/someFile.txt");
         Assert.AreEqual("some text", actualContents);
-    }
-
-
-    [TestMethod]
-    public void TestReadingNonExistingFile() {
-        CreateCleanTempFolder();
-
-        var reliableFile = new ReliableFile(NullLogger.Instance);
-        reliableFile.Initialize("temp/someFile.txt");
-
-        var isOk = reliableFile.TryReadAllText(out var fileContent);
-        Assert.IsFalse(isOk, "File doesn't exist, must return false");
-    }
-
-
-    [TestMethod]
-    public void TestUnrecoverableFileFromRf1() {
-        CreateCleanTempFolder();
-
-        // Simulating state when system crashed after first write to rf1.
-        File.WriteAllText("temp/someFile.txt.rf1", "some text");
-
-        var reliableFile = new ReliableFile(NullLogger.Instance);
-        reliableFile.Initialize("temp/someFile.txt");
-
-        var isOk = reliableFile.TryReadAllText(out var fileContent);
-        Assert.IsFalse(isOk, "No recovery must be done from .rf1, must return false");
     }
 
     [TestMethod]
@@ -100,22 +94,6 @@ public class ReliableFileTests {
         Assert.AreEqual("new text", actualFileContents, "Backup from rf2 must be made");
     }
 
-
-    [TestMethod]
-    public void TestRecoverableFileFromRf2() {
-        CreateCleanTempFolder();
-
-        // Simulating state when system crashed after successfully writing to rf1 and moving it to rf2. 
-        File.WriteAllText("temp/someFile.txt.rf2", "some text");
-
-        var reliableFile = new ReliableFile(NullLogger.Instance);
-        reliableFile.Initialize("temp/someFile.txt");
-
-        var isOk = reliableFile.TryReadAllText(out var fileContent);
-        Assert.IsTrue(isOk);
-        Assert.AreEqual("some text", fileContent);
-    }
-
     [TestMethod]
     public void TestIfRf1IsCleanedUp() {
         CreateCleanTempFolder();
@@ -145,24 +123,63 @@ public class ReliableFileTests {
     }
 
     [TestMethod]
-    public void TestAlreadyOpenFile() {
+    public void TestInvalidFilenames() {
         CreateCleanTempFolder();
 
-        // Simulating opened file by other program.
-        using (var openFileStream = File.Open("temp/someFile.txt", FileMode.OpenOrCreate)) {
+        var invalidFilename = new[] { "?.txt", ":.?" };
+
+        foreach (var filename in invalidFilename) {
             var reliableFile = new ReliableFile(NullLogger.Instance);
-            reliableFile.Initialize("temp/someFile.txt");
-
             try {
-                var isOk = reliableFile.TryReadAllText(out var fileContent);
-                Assert.IsFalse(isOk, "Must fail because file isn't accessible.");
-
-                isOk = reliableFile.TryWriteAllText("Some text");
-                Assert.IsFalse(isOk, "Must fail because file isn't accessible.");
-            } catch (Exception ex) {
-                Assert.Fail("No exception should be thrown", ex);
+                reliableFile.Initialize(filename);
+                Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
+            } catch (Exception) {
+                // All good.
             }
         }
+    }
+
+
+    [TestMethod]
+    public void TestReadingNonExistingFile() {
+        CreateCleanTempFolder();
+
+        var reliableFile = new ReliableFile(NullLogger.Instance);
+        reliableFile.Initialize("temp/someFile.txt");
+
+        var isOk = reliableFile.TryReadAllText(out var fileContent);
+        Assert.IsFalse(isOk, "File doesn't exist, must return false");
+    }
+
+
+    [TestMethod]
+    public void TestRecoverableFileFromRf2() {
+        CreateCleanTempFolder();
+
+        // Simulating state when system crashed after successfully writing to rf1 and moving it to rf2. 
+        File.WriteAllText("temp/someFile.txt.rf2", "some text");
+
+        var reliableFile = new ReliableFile(NullLogger.Instance);
+        reliableFile.Initialize("temp/someFile.txt");
+
+        var isOk = reliableFile.TryReadAllText(out var fileContent);
+        Assert.IsTrue(isOk);
+        Assert.AreEqual("some text", fileContent);
+    }
+
+
+    [TestMethod]
+    public void TestUnrecoverableFileFromRf1() {
+        CreateCleanTempFolder();
+
+        // Simulating state when system crashed after first write to rf1.
+        File.WriteAllText("temp/someFile.txt.rf1", "some text");
+
+        var reliableFile = new ReliableFile(NullLogger.Instance);
+        reliableFile.Initialize("temp/someFile.txt");
+
+        var isOk = reliableFile.TryReadAllText(out var fileContent);
+        Assert.IsFalse(isOk, "No recovery must be done from .rf1, must return false");
     }
 
     private void CreateCleanTempFolder() {
@@ -176,23 +193,5 @@ public class ReliableFileTests {
         }
 
         Directory.CreateDirectory("temp");
-    }
-
-    [TestMethod]
-    public void TestInvalidFilenames() {
-        CreateCleanTempFolder();
-
-        var invalidFilename = new[] { "?.txt", ":.?" };
-
-        foreach (var filename in invalidFilename) {
-            var reliableFile = new ReliableFile(NullLogger.Instance);
-            try {
-                reliableFile.Initialize(filename);
-                Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
-            }
-            catch (Exception) {
-                // All good.
-            }
-        }
     }
 }

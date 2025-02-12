@@ -10,38 +10,6 @@ namespace TevuxTech.Storage.Settings;
 public class SettingsProviderTests {
     public double Test;
 
-
-    [TestMethod]
-    public void TestBasicSetGet() {
-        CreateCleanTempFolder();
-
-        var settings = new SettingsProvider(NullLoggerFactory.Instance);
-        var settingsFile = new ReliableFile(NullLogger.Instance);
-        settingsFile.Initialize("temp/someSettings.json");
-        settings.Initialize(settingsFile);
-
-        settings.TrySet("SomeIntegerKey", 123);
-        settings.TryGet("SomeIntegerKey", out int someIntegerValue);
-        Assert.AreEqual(123, someIntegerValue);
-
-        settings.TrySet("SomeDoubleKey", 123.456);
-        settings.TryGet("SomeDoubleKey", out double someDoubleValue);
-        Assert.AreEqual(123.456, someDoubleValue);
-
-        settings.TrySet("SomeBoolKey", true);
-        settings.TryGet("SomeBoolKey", out bool someBoolValue);
-        Assert.AreEqual(true, someBoolValue);
-
-        settings.TrySet("SomeStringKey", "Some string");
-        settings.TryGet("SomeStringKey", out string someStringValue);
-        Assert.AreEqual("Some string", someStringValue);
-
-        var someDateTimeToSet = DateTime.Now;
-        settings.TrySet("SomeDateTimeKey", someDateTimeToSet);
-        settings.TryGet("SomeDateTimeKey", out DateTime someDateTimeValue);
-        Assert.AreEqual(someDateTimeToSet, someDateTimeValue);
-    }
-
     [TestMethod]
     public void TestBasicFileLoading() {
         CreateCleanTempFolder();
@@ -106,27 +74,59 @@ public class SettingsProviderTests {
         Assert.AreEqual(expectedFileContents, actualFileContents);
     }
 
-    [TestMethod]
-    public void TestNumberConversion() {
-        CreateCleanTempFolder();
 
-        File.WriteAllText("temp/someSettings.json", @"{
-                ""SomeIntegerKey"": 123.456,
-                ""SomeIntegerKey2"": 123.5
-            }");
+    [TestMethod]
+    public void TestBasicSetGet() {
+        CreateCleanTempFolder();
 
         var settings = new SettingsProvider(NullLoggerFactory.Instance);
         var settingsFile = new ReliableFile(NullLogger.Instance);
         settingsFile.Initialize("temp/someSettings.json");
         settings.Initialize(settingsFile);
 
-        var isOk = settings.TryGet("SomeIntegerKey", out int someInteger);
-        Assert.IsTrue(isOk);
-        Assert.AreEqual(123, someInteger);
+        settings.TrySet("SomeIntegerKey", 123);
+        settings.TryGet("SomeIntegerKey", out int someIntegerValue);
+        Assert.AreEqual(123, someIntegerValue);
 
-        isOk = settings.TryGet("SomeIntegerKey2", out int someInteger2);
+        settings.TrySet("SomeDoubleKey", 123.456);
+        settings.TryGet("SomeDoubleKey", out double someDoubleValue);
+        Assert.AreEqual(123.456, someDoubleValue);
+
+        settings.TrySet("SomeBoolKey", true);
+        settings.TryGet("SomeBoolKey", out bool someBoolValue);
+        Assert.AreEqual(true, someBoolValue);
+
+        settings.TrySet("SomeStringKey", "Some string");
+        settings.TryGet("SomeStringKey", out string someStringValue);
+        Assert.AreEqual("Some string", someStringValue);
+
+        var someDateTimeToSet = DateTime.Now;
+        settings.TrySet("SomeDateTimeKey", someDateTimeToSet);
+        settings.TryGet("SomeDateTimeKey", out DateTime someDateTimeValue);
+        Assert.AreEqual(someDateTimeToSet, someDateTimeValue);
+    }
+
+    [TestMethod]
+    public void TestFloatSetting() {
+        CreateCleanTempFolder();
+
+        var reliableFile = new ReliableFile(NullLogger.Instance);
+        reliableFile.Initialize("temp/someSettings.json");
+
+        var settings = new SettingsProvider(NullLoggerFactory.Instance);
+        settings.Initialize(reliableFile);
+        var someSetting = 10.0f / 9;
+        settings.TrySet("SomeFloatNumber", someSetting);
+
+        var isOk = settings.TryGet("SomeFloatNumber", out float loadedFloatSetting);
         Assert.IsTrue(isOk);
-        Assert.AreEqual(124, someInteger2, "Value should probably be rounded");
+        Assert.AreEqual(loadedFloatSetting, someSetting);
+
+        var someDoubleSetting = 10.0 / 9;
+        settings.TrySet("SomeDoubleNumber", someDoubleSetting);
+        isOk = settings.TryGet("SomeDoubleNumber", out float loadedSetting);
+        Assert.IsTrue(isOk);
+        Assert.AreEqual((float)someDoubleSetting, loadedSetting);
     }
 
     [TestMethod]
@@ -162,29 +162,6 @@ public class SettingsProviderTests {
 
         var isBackupCorrect = File.ReadAllText(settings.DataFile.Path + ".backup") == "Invalid json text";
         Assert.IsTrue(isBackupCorrect);
-    }
-
-    [TestMethod]
-    public void TestTwoBackups() {
-        CreateCleanTempFolder();
-
-        File.WriteAllText("temp/someSettings.json", "Invalid json text");
-
-        var settings = new SettingsProvider(NullLoggerFactory.Instance);
-        var settingsFile = new ReliableFile(NullLogger.Instance);
-        settingsFile.Initialize("temp/someSettings.json");
-        settings.Initialize(settingsFile);
-
-        File.WriteAllText("temp/someSettings.json", "Invalid json text again...");
-
-        try {
-            settings = new SettingsProvider(NullLoggerFactory.Instance);
-            var settingsFile2 = new ReliableFile(NullLogger.Instance);
-            settingsFile2.Initialize("temp/someSettings.json");
-            settings.Initialize(settingsFile2);
-        } catch (Exception ex) {
-            Assert.Fail("No exception should be thrown", ex);
-        }
     }
 
     [TestMethod]
@@ -224,6 +201,29 @@ public class SettingsProviderTests {
     }
 
     [TestMethod]
+    public void TestNumberConversion() {
+        CreateCleanTempFolder();
+
+        File.WriteAllText("temp/someSettings.json", @"{
+                ""SomeIntegerKey"": 123.456,
+                ""SomeIntegerKey2"": 123.5
+            }");
+
+        var settings = new SettingsProvider(NullLoggerFactory.Instance);
+        var settingsFile = new ReliableFile(NullLogger.Instance);
+        settingsFile.Initialize("temp/someSettings.json");
+        settings.Initialize(settingsFile);
+
+        var isOk = settings.TryGet("SomeIntegerKey", out int someInteger);
+        Assert.IsTrue(isOk);
+        Assert.AreEqual(123, someInteger);
+
+        isOk = settings.TryGet("SomeIntegerKey2", out int someInteger2);
+        Assert.IsTrue(isOk);
+        Assert.AreEqual(124, someInteger2, "Value should probably be rounded");
+    }
+
+    [TestMethod]
     public void TestRemove() {
         CreateCleanTempFolder();
 
@@ -254,26 +254,26 @@ public class SettingsProviderTests {
     }
 
     [TestMethod]
-    public void TestFloatSetting() {
+    public void TestTwoBackups() {
         CreateCleanTempFolder();
 
-        var reliableFile = new ReliableFile(NullLogger.Instance);
-        reliableFile.Initialize("temp/someSettings.json");
+        File.WriteAllText("temp/someSettings.json", "Invalid json text");
 
         var settings = new SettingsProvider(NullLoggerFactory.Instance);
-        settings.Initialize(reliableFile);
-        var someSetting = 10.0f / 9;
-        settings.TrySet("SomeFloatNumber", someSetting);
+        var settingsFile = new ReliableFile(NullLogger.Instance);
+        settingsFile.Initialize("temp/someSettings.json");
+        settings.Initialize(settingsFile);
 
-        var isOk = settings.TryGet("SomeFloatNumber", out float loadedFloatSetting);
-        Assert.IsTrue(isOk);
-        Assert.AreEqual(loadedFloatSetting, someSetting);
+        File.WriteAllText("temp/someSettings.json", "Invalid json text again...");
 
-        var someDoubleSetting = 10.0 / 9;
-        settings.TrySet("SomeDoubleNumber", someDoubleSetting);
-        isOk = settings.TryGet("SomeDoubleNumber", out float loadedSetting);
-        Assert.IsTrue(isOk);
-        Assert.AreEqual((float)someDoubleSetting, loadedSetting);
+        try {
+            settings = new SettingsProvider(NullLoggerFactory.Instance);
+            var settingsFile2 = new ReliableFile(NullLogger.Instance);
+            settingsFile2.Initialize("temp/someSettings.json");
+            settings.Initialize(settingsFile2);
+        } catch (Exception ex) {
+            Assert.Fail("No exception should be thrown", ex);
+        }
     }
 
     private static void CreateCleanTempFolder() {
