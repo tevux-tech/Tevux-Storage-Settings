@@ -177,4 +177,22 @@ public class ReliableFileTests {
 
         Directory.CreateDirectory("temp");
     }
+
+    [TestMethod]
+    public void TestInvalidFilenames() {
+        CreateCleanTempFolder();
+
+        var invalidFilename = new[] { "?.txt", ":.?" };
+
+        foreach (var filename in invalidFilename) {
+            var reliableFile = new ReliableFile(NullLogger.Instance);
+            try {
+                reliableFile.Initialize(filename);
+                Assert.Fail("Initialize() with invalid name should throw exception so this line should never execute.");
+            }
+            catch (Exception) {
+                // All good.
+            }
+        }
+    }
 }
