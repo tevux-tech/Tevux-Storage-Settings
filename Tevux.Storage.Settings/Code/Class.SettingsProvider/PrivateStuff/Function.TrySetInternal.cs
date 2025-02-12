@@ -1,4 +1,4 @@
-namespace TevuxTech.Storage.Settings;
+namespace Tevux.Storage.Settings;
 
 public partial class SettingsProvider {
     private bool TrySetInternal<T>(string key, T value) {

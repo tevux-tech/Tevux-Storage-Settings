@@ -1,4 +1,4 @@
-namespace TevuxTech.Storage.Settings;
+namespace Tevux.Storage.Settings;
 
 /// <summary>
 /// Class executes file read/write operations reliably. If system fails at write operation original file content will be restored.
