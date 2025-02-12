@@ -7,8 +7,8 @@
     <Description>Library for reliably storing and loading application settings/data to JSON file.</Description>
     <Authors>Tevux Technologies</Authors>
     <Company>Tevux Technologies</Company>
-    <RepositoryUrl>https://github.com/tevux-tech/TevuxTech-Storage-Settings</RepositoryUrl>
-    <RootNamespace>TevuxTech.Storage.Settings</RootNamespace>
+    <RepositoryUrl>https://github.com/tevux-tech/Tevux-Storage-Settings</RepositoryUrl>
+    <RootNamespace>Tevux.Storage.Settings</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

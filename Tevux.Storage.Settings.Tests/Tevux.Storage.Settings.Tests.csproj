@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>TevuxTech.Software.Settings.Tests</RootNamespace>
-    <AssemblyName>TevuxTech.Software.Settings.Tests</AssemblyName>
+    <RootNamespace>Tevux.Software.Settings.Tests</RootNamespace>
+    <AssemblyName>Tevux.Software.Settings.Tests</AssemblyName>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TevuxTech.Storage.Settings\TevuxTech.Storage.Settings.csproj" />
+    <ProjectReference Include="..\Tevux.Storage.Settings\Tevux.Storage.Settings.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
