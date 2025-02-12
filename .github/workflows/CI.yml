@@ -46,6 +46,8 @@ jobs:
       - name: Publish the package to GPR
         run: dotnet nuget push Tevux.Storage.Settings/bin/Release/*.nupkg
 
-      - name: Publish the package to nuget.org
+      - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.5
+
+      - name: Publish the package to nuget.org
         run:  nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
