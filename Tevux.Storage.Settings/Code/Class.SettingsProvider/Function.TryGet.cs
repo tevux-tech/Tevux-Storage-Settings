@@ -1,32 +1,28 @@
 namespace Tevux.Storage.Settings;
 
 public partial class SettingsProvider {
-    public bool TryGet(string key, out int value) {
-        value = 0;
-
-        var isOk = TryGetInternal(key, out var valueOfUnknownType);
-        if (isOk) {
-            if (TryConvert(valueOfUnknownType, out value) == false) {
-                _logger.LogError($"Can't get setting with key \"{key}\" because it is already set and type does not match integer. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
-                isOk = false;
-            }
+    public string Get(string key, string defaultValue = "") {
+        if (TryGet(key, out string value)) {
+            return value;
+        } else {
+            return defaultValue;
         }
-
-        return isOk;
     }
 
-    public bool TryGet(string key, out double value) {
-        value = 0;
-
-        var isOk = TryGetInternal(key, out var valueOfUnknownType);
-        if (isOk) {
-            if (TryConvert(valueOfUnknownType, out value) == false) {
-                _logger.LogError($"Can't get setting with key \"{key}\" because it is already set and type does not match double. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
-                isOk = false;
-            }
+    public bool Get(string key, bool defaultValue) {
+        if (TryGet(key, out bool value)) {
+            return value;
+        } else {
+            return defaultValue;
         }
+    }
 
-        return isOk;
+    public float Get(string key, float defaultValue) {
+        if (TryGet(key, out float value)) {
+            return value;
+        } else {
+            return defaultValue;
+        }
     }
 
     public bool TryGet(string key, out float value) {
@@ -64,20 +60,6 @@ public partial class SettingsProvider {
         if (isOk) {
             if (TryConvert(valueOfUnknownType, out value) == false) {
                 _logger.LogError($"Can't get setting with key \"{key}\" because it is already set and type does not match string. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
-                isOk = false;
-            }
-        }
-
-        return isOk;
-    }
-
-    public bool TryGet(string key, out DateTime value) {
-        value = DateTime.MinValue;
-
-        var isOk = TryGetInternal(key, out var valueOfUnknownType);
-        if (isOk) {
-            if (TryConvert(valueOfUnknownType, out value) == false) {
-                _logger.LogError($"Can't get setting with key \"{key}\" because it is already set and type does not match DateTime. Setting value: {Encoding.UTF8.GetString(JsonSerializer.Serialize(valueOfUnknownType))}.");
                 isOk = false;
             }
         }
