@@ -38,13 +38,15 @@ jobs:
           dotnet-version: '8.0.x' 
           source-url: https://nuget.pkg.github.com/tevux-tech/index.json
         env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NUGET_AUTH_TOKEN: ${{secrets.NUGET_API_KEY}}
 
       - name: Build
         run: dotnet build --configuration Release Tevux.Storage.Settings
 
+      - name: Publish the package to nuget.org
+        run:  dotnet nuget push **\*.nupkg --source 'https://api.nuget.org/v3/index.json' --api-key ${{ secrets.NUGET_API_KEY }}
+  
       - name: Publish the package to GPR
         run: dotnet nuget push Tevux.Storage.Settings/bin/Release/*.nupkg
 
-      - name: Publish the package to nuget.org
-        run:  dotnet nuget push **\*.nupkg --source 'https://api.nuget.org/v3/index.json' --api-key ${{ secrets.NUGET_API_KEY }}
+  
