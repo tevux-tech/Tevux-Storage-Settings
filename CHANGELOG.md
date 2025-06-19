@@ -1,5 +1,14 @@
 # Tevux.Software.Settings Changelog
 
+## [3.0.0] - 2025-06-19
+
+### Added
+- Get() methods which either reads the setting or return a provided default value.
+
+### Removed
+- Dropped support for double, int and DateTime types.
+
+
 ## [2.1.0] - 2025-02-12
 ### Changed
 - No functional changes, just optimizations.
