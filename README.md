@@ -49,20 +49,26 @@ if (reliableFile.TryReadAllText(out var fileContent)){
 ## SettingsProvider
 
 This class provides dictionary-like settings storage and utilizes `ReliableFile`. It is simplistic by design. It only
-allows storing very simple data types: `int`, `float`, `double`, `string`, `bool` and `DateTime`. Also, there are no
-sections or categories. It is meant to store a handful of settings, and do that reliably.
+allows storing very simple data types: `float`, `string` and `bool`. Also, there are no sections or categories. 
+It is meant to store a handful of settings, and do that reliably.
 
 Content is saved as JSON.
 
 Here's how to use it:
 
 ```
+// Preparing an underlying ReliableFile.
 var settingsFile = new ReliableFile();
 settings.Initialize(settingsFile);
 
+// Loading that file into SettingsProvider.
 var settings = new SettingsProvider();
 settingsFile.Initialize("temp/someSettings.json");
 
-settings.TrySet("SomeIntegerKey", 123);
-settings.TryGet("SomeIntegerKey", out int someIntegerValue);
+// Setting and getting a value.
+settings.TrySet("SomeNumberKey", 123);
+settings.TryGet("SomeNumberKey", out float someIntegerValue);
+
+// When getting a non-existent setting, you may also specify a default value.
+var setting = settings.Get("SomeNonExistentKey", "Default value");
 ```
