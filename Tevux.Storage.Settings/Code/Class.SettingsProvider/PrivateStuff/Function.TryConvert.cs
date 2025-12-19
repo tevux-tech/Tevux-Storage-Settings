@@ -5,6 +5,10 @@ public partial class SettingsProvider {
         var isOk = true;
 
         switch (valueToConvert) {
+            case int valueAsInt:
+                convertedValue = valueAsInt;
+                break;
+
             case float valueAsFloat:
                 convertedValue = valueAsFloat;
                 break;
