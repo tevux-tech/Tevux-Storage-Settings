@@ -1,5 +1,11 @@
 # Tevux.Software.Settings Changelog
 
+## [3.0.4] - 2025-12-19
+
+### Fixed
+- Number "1" will be deserialized to float on all PCs (hopefully). Again.
+
+
 ## [3.0.3] - 2025-12-19
 
 ### Fixed
